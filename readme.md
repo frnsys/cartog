@@ -157,4 +157,6 @@ let menu = new Menu('Farm Mall', [
 
 So buttons basically take a title and then a function that's executed if that button is clicked.
 
+One thing of note with the `Menu` class it that when you create a new `Menu`, it will automatically have a button added to the page that will open that menu when clicked.
+
 The `Modal` class is very similar to the `Menu` class, but as the name suggests more appropriate for modals/popups.
