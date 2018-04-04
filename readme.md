@@ -1,4 +1,4 @@
-# carto
+# cartog
 
 Small JS library for building simple management simulators/games, built on top of p5js.
 
@@ -6,7 +6,7 @@ Developed for the Simulation & Cybernetics class at The New School.
 
 More than anything it's meant to let students focus on the system design of their games rather than worry about the nitty-gritty of implementing stuff like menus. In the interest of avoiding causing additional complexity for students, the framework is simple, and so somewhat limited, but hopefully still expressive enough for students to explore a wide variety of interesting domains.
 
-Speaking to the limitations: `carto` is designed for games that involve a top-down 2D grid and are focused on resource management. The primary interactions it supports are menu-based and grid-clicking. Through a basic event/modal system, `carto` should be able to handle a decent amount of dialogue narrative.
+Speaking to the limitations: `cartog` is designed for games that involve a top-down 2D grid and are focused on resource management. The primary interactions it supports are menu-based and grid-clicking. Through a basic event/modal system, `cartog` should be able to handle a decent amount of dialogue narrative.
 
 This is an early first version that will evolve as the needs of the class become clearer.
 
