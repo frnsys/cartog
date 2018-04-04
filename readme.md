@@ -14,6 +14,8 @@ This is an early first version that will evolve as the needs of the class become
 
 See `index.html` and `main.js`.
 
+![](shot.png)
+
 # Setup
 
 In your script you need to include the following:
