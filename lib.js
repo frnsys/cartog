@@ -1,3 +1,5 @@
+'use strict';
+
 const GAME = {
   messages: [],
   harvesters: [],
@@ -66,7 +68,7 @@ function tryBuy(cls, onSuccess) {
   return () => {
     let o = new cls();
     if (buy(o)) {
-      if (o instanceof Thing) {
+      if (o instanceof Item) {
         GAME.selected = o;
       } else if (o instanceof Bonus) {
         if (o.effect) o.effect();
@@ -100,7 +102,7 @@ function hasBonus(name) {
   return GAME.bonuses.includes(name);
 }
 
-class Thing {
+class Item {
   constructor() {
     this.level = 0;
     this.init();
@@ -243,7 +245,9 @@ class Grid {
   }
 
   cellAt(x, y) {
-    let [x_, y_] = this.convertCoord(x, y);
+    let coord = this.convertCoord(x, y);
+    let x_ = coord[0];
+    let y_ = coord[1];
     return this.grid[x_][y_];
   }
 
@@ -261,7 +265,9 @@ class Grid {
     if (obj) {
       obj.onClick();
     } else if (GAME.selected) {
-      let [x_, y_] = this.convertCoord(x, y);
+      let coord = this.convertCoord(x, y);
+      let x_ = coord[0];
+      let y_ = coord[1];
       this.place(GAME.selected, x_, y_);
       GAME.selected = null;
     }
@@ -276,10 +282,13 @@ class Grid {
 
 const messagePadding = 6;
 
-function showMessage(text, color=[0,0,0], timeout=5000, size=16) {
+function showMessage(text, color, timeout, size) {
   // no support for text wrapping
+  color = color || [0,0,0];
+  timeout = timeout || 5000;
+  size = size || 16;
   let width = textWidth(text);
-  g = createGraphics(width*2, size*2);
+  let g = createGraphics(width*2, size*2);
   g.fill(...color);
   // g.background(0,255,0); // DEBUG
   g.textSize(size);
@@ -300,7 +309,8 @@ function renderMessages(x, y) {
   });
 }
 
-function renderResources(top, right, size=16) {
+function renderResources(top, right, size) {
+  size = size || 16;
   let height = size;
   Object.keys(STATE.resources).forEach((k, i) => {
     let name = RESOURCES[k] || k;
@@ -311,7 +321,8 @@ function renderResources(top, right, size=16) {
   });
 }
 
-function renderTooltip(size, padding=10) {
+function renderTooltip(size, padding) {
+  padding = padding || 10;
   if (!GAME.tooltip) {
     return;
   }

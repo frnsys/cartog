@@ -42,7 +42,7 @@ const RESOURCES = {
 
 These are automatically rendered as part of the UI.
 
-`IMAGES`, which passes in relative file paths of images to use. These are referenced in the `Thing`'s `image` getter (see below). For example:
+`IMAGES`, which passes in relative file paths of images to use. These are referenced in the `Item`'s `image` getter (see below). For example:
 
 ```
 const IMAGES = [
@@ -70,25 +70,25 @@ Then the two top-level functions you should define are:
 
 The main classes:
 
-## `Thing`
+## `Item`
 
 Subclass this for objects that can be bought and placed on the grid.
 
 You need to implement the following:
 
 - `get cost()`: this should return an JS object of `{resourceName: resourceCost}`.
-- `get info()`: this should return a string describing the thing
-- `get image()`: this should return the filename of the image used to represent this thing. It will be forced into a square so keep that in mind.
-- `onClick()`: implements a function that's called when the thing is clicked on
+- `get info()`: this should return a string describing the item
+- `get image()`: this should return the filename of the image used to represent this item. It will be forced into a square so keep that in mind.
+- `onClick()`: implements a function that's called when the item is clicked on
 
 You can optionally implement:
 
-- `init()`: called when the thing is first created. You can, for example, setup some initial values for the thing.
-- `update(neighbors)`: called every frame and is passed an array of the thing's [Moore neighbors](https://en.wikipedia.org/wiki/Moore_neighborhood) in the grid, if any. You can use this, for instance, for cellular automata dynamics and the like (e.g. a blight spreading through a field of crops).
+- `init()`: called when the item is first created. You can, for example, setup some initial values for the item.
+- `update(neighbors)`: called every frame and is passed an array of the item's [Moore neighbors](https://en.wikipedia.org/wiki/Moore_neighborhood) in the grid, if any. You can use this, for instance, for cellular automata dynamics and the like (e.g. a blight spreading through a field of crops).
 
 Some built-in methods you'll likely use:
 
-- `destroy()`: removes this thing from the grid, effectively destroying it
+- `destroy()`: removes this item from the grid, effectively destroying it
 
 ## `Bonus`
 
@@ -137,13 +137,13 @@ The main functions you'll probably use are:
 - `defineHarvester(name, fn, time)`: sets a function `fn` to be called every `time` seconds. The function is expected to return a number, which is used to modify the resource named `name`.
 - `every(ms, fn)`: call the function `fn` every `ms` milliseconds.
 - `schedule(ms, fn)`: call the function `fn` once in `ms` milliseconds.
-- `tryBuy(thingClass, fn)`: most useful for buttons for buying things(see below). Will try to buy the thing if the player can afford it; if not, it will tell them they can't afford it and how much it costs. An optional function `fn` can be passed, which is called if the thing is successfully bought.
+- `tryBuy(itemClass, fn)`: most useful for buttons for buying items (see below). Will try to buy the item if the player can afford it; if not, it will tell them they can't afford it and how much it costs. An optional function `fn` can be passed, which is called if the item is successfully bought.
 
 # UI
 
 The main UI elements are `Menu`, `Modal`, and `Button`. `Menu` and `Modal` are similar, and more or less function as ways of grouping `Button`s together.
 
-The `Menu` class is well-suited for, well, menus, such as those players can buy things from:
+The `Menu` class is well-suited for, well, menus, such as those players can buy items from:
 
 ```
 let menu = new Menu('Farm Mall', [
