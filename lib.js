@@ -93,7 +93,7 @@ function buy(obj) {
 
 // handy func to pass to buttons
 // that just involve buying things
-function tryBuy(cls, onSuccess) {
+function tryBuy(cls) {
   let fn = () => {
     let o = isConstructor(cls) ? new cls() : cls;
     if (buy(o)) {
@@ -102,8 +102,9 @@ function tryBuy(cls, onSuccess) {
       } else if (o instanceof Bonus) {
         if (o.effect) o.effect();
         GAME.bonuses.push(o.name);
+      } else if (o.effect) {
+        o.effect();
       }
-      if (onSuccess) onSuccess(o);
     } else {
       let cost = renderCost(o.cost);
       let modal = new Modal('You can\'t afford this', `This costs ${cost}`);
@@ -148,6 +149,10 @@ class Item {
   }
 
   onClick() {
+    throw Error('Not implemented');
+  }
+
+  onPlace() {
     throw Error('Not implemented');
   }
 
@@ -329,6 +334,7 @@ class Grid {
       let x_ = coord[0];
       let y_ = coord[1];
       this.place(GAME.selected, x_, y_);
+      if (GAME.selected.onPlace) GAME.selected.onPlace;
       GAME.selected = null;
     }
   }
@@ -457,6 +463,12 @@ class Button {
   }
 }
 
+class BuyButton extends Button {
+  constructor(text, cls) {
+    super(text, tryBuy(cls));
+  }
+}
+
 class Modal {
   constructor(title, text, buttons) {
     this.title = title;
@@ -506,11 +518,14 @@ function renderGraphic(g, x, y) {
   copy(g, 0, 0, g.width, g.height, x, y, g.width, g.height);
 }
 
-
-
 // more semantic
 class Event extends Modal {};
-class Action extends Button {};
+class Action extends BuyButton {
+  constructor(text, cost, effect) {
+    let action = {cost: cost, effect: effect};
+    super(text, action);
+  }
+};
 
 // --- P5JS
 
