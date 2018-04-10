@@ -5,8 +5,10 @@ const GAME = {
   harvesters: [],
   images: {},
   bonuses: [],
+  timers: [],
   tooltip: null,
-  grid: null
+  grid: null,
+  paused: false
 };
 
 // setup tooltip for buttons
@@ -27,13 +29,13 @@ document.body.appendChild(tooltip);
 // --- UTIL
 
 // schedule a function to be run every ms millseconds
-function every(ms, fn) {
-  return setInterval(fn, ms);
+function every(fn, ms) {
+  return new Timer(fn, ms, true);
 }
 
 // schedule a function to run in ms milliseconds
-function schedule(ms, fn) {
-  return setTimeout(fn, ms);
+function schedule(fn, ms) {
+  return new Timer(fn, ms);
 }
 
 function numberWithCommas(x) {
@@ -44,7 +46,7 @@ function isConstructor(obj) {
   return !!obj.prototype && !!obj.prototype.constructor.name;
 }
 
-function renderCost(cost) {
+function stringifyCost(cost) {
   let costs = [];
   Object.keys(cost).forEach((k) => {
     let name = RESOURCES[k] || k;
@@ -54,6 +56,63 @@ function renderCost(cost) {
   return costs.join(', ');
 }
 
+// --- TIME
+
+class Timer {
+  // timer that can be paused/resumed.
+  // set repeat=true to use as an interval timer.
+  constructor(fn, ms, repeat) {
+    this.fn = fn;
+    this.ms = ms;
+    this.remaining = ms;
+    this.repeat = repeat || false;
+    GAME.timers.push(this);
+
+    if (!GAME.paused) {
+      this.resume();
+    }
+  }
+
+  pause() {
+    clearTimeout(this.id);
+    this.remaining -= new Date() - this.start;
+  }
+
+  resume() {
+    this.start = new Date();
+    clearTimeout(this.id);
+    this.id = setTimeout(() => {
+      this.fn();
+
+      if (this.repeat) {
+        this.remaining = this.ms;
+        this.resume();
+      } else {
+        this.delete();
+      }
+    }, this.remaining);
+  }
+
+  delete() {
+    // remove from timers
+    let idx = GAME.timers.indexOf(this);
+    GAME.timers.splice(idx, 1);
+  }
+}
+
+
+function pause() {
+  GAME.paused = true;
+  GAME.timers.forEach((t) => t.pause());
+  console.log(GAME.timers[0]);
+}
+
+function resume() {
+  GAME.paused = false;
+  GAME.timers.forEach((t) => t.resume());
+}
+
+
 // --- RESOURCES
 
 // a harvester is a function that
@@ -62,7 +121,7 @@ function defineHarvester(name, fn, time) {
   if (!(name in GAME.harvesters)) {
    GAME.harvesters[name] = [];
   }
-  let interval = setInterval(() => {
+  let interval = every(() => {
     STATE.resources[name] += fn();
   }, time);
   GAME.harvesters[name].push(interval);
@@ -106,7 +165,7 @@ function tryBuy(cls) {
         o.effect();
       }
     } else {
-      let cost = renderCost(o.cost);
+      let cost = stringifyCost(o.cost);
       let modal = new Modal('You can\'t afford this', `This costs ${cost}`);
     }
   };
@@ -335,13 +394,18 @@ class Grid {
       let y_ = coord[1];
       this.place(GAME.selected, x_, y_);
       if (GAME.selected.onPlace) GAME.selected.onPlace;
-      GAME.selected = null;
     }
   }
 
   remove(x, y) {
     this.grid[x][y] = null;
   }
+}
+
+// convenience method for placing
+// on the game grid
+function place(obj, x, y) {
+  GAME.grid.place(obj, x, y);
 }
 
 // --- UI
@@ -362,7 +426,7 @@ function showMessage(text, color, timeout, size) {
   g.text(text, 0, size/2);
 
   GAME.messages.push(g);
-  setTimeout(() => {
+  schedule(() => {
     let idx = GAME.messages.indexOf(g);
     GAME.messages.splice(idx, 1);
   }, timeout);
@@ -414,6 +478,7 @@ class Menu {
   }
 
   render() {
+    pause();
     let el = document.createElement('div');
 
     let title = document.createElement('h1');
@@ -446,11 +511,12 @@ class Button {
     bEl.addEventListener('click', (ev) => {
       ev.stopPropagation();
       overlay.style.display = 'none';
-      this.onClick();
       tooltip.style.display = 'none';
+      this.onClick();
+      resume();
     });
     if (this.obj) {
-      let cost = renderCost(this.obj.cost);
+      let cost = stringifyCost(this.obj.cost);
       bEl.addEventListener('mouseenter', (ev) => {
         tooltip.style.display = 'block';
         tooltip.innerText = `Costs: ${cost}`;
@@ -480,6 +546,7 @@ class Modal {
   }
 
   render() {
+    pause();
     let el = document.createElement('div');
 
     let title = document.createElement('h1');
@@ -550,7 +617,9 @@ function preload() {
 
 function draw() {
   main();
-  GAME.grid.update();
+  if (!GAME.paused) {
+    GAME.grid.update();
+  }
   GAME.grid.render();
   renderMessages(10, 10);
   renderResources(10, 10);
@@ -577,5 +646,7 @@ function mouseMoved() {
 function mouseClicked() {
   if (GAME.grid && GAME.grid.inside(mouseX, mouseY)) {
     GAME.grid.clickCell(mouseX, mouseY);
+  } else {
+    GAME.selected = null;
   }
 }
