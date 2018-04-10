@@ -9,6 +9,21 @@ const GAME = {
   grid: null
 };
 
+// setup tooltip for buttons
+const tooltip = document.createElement('div');
+tooltip.classList.add('tooltip');
+tooltip.style.position = 'absolute';
+tooltip.style.padding = '0.3em 0.6em';
+tooltip.style.background = '#333';
+tooltip.style.color = '#fff';
+tooltip.style.display = 'none';
+tooltip.style.zIndex = '10';
+this.addEventListener('mousemove', (ev) => {
+  tooltip.style.left = `${ev.pageX + 5}px`;
+  tooltip.style.top = `${ev.pageY + 5}px`;
+});
+document.body.appendChild(tooltip);
+
 // --- UTIL
 
 // schedule a function to be run every ms millseconds
@@ -27,6 +42,16 @@ function numberWithCommas(x) {
 
 function isConstructor(obj) {
   return !!obj.prototype && !!obj.prototype.constructor.name;
+}
+
+function renderCost(cost) {
+  let costs = [];
+  Object.keys(cost).forEach((k) => {
+    let name = RESOURCES[k] || k;
+    let body = `${name} ${numberWithCommas(cost[k])}`;
+    costs.push(body);
+  });
+  return costs.join(', ');
 }
 
 // --- RESOURCES
@@ -69,13 +94,8 @@ function buy(obj) {
 // handy func to pass to buttons
 // that just involve buying things
 function tryBuy(cls, onSuccess) {
-  return () => {
-    let o;
-    if (isConstructor(cls)) {
-      o = new cls();
-    } else {
-      o = cls;
-    }
+  let fn = () => {
+    let o = isConstructor(cls) ? new cls() : cls;
     if (buy(o)) {
       if (o instanceof Item) {
         GAME.selected = o;
@@ -85,16 +105,13 @@ function tryBuy(cls, onSuccess) {
       }
       if (onSuccess) onSuccess(o);
     } else {
-      let costs = [];
-      Object.keys(o.cost).forEach((k) => {
-        let name = RESOURCES[k] || k;
-        let body = `${name} ${numberWithCommas(o.cost[k])}`;
-        costs.push(body);
-      });
-
-      let modal = new Modal('You can\'t afford this', `This costs ${costs.join(', ')}`);
+      let cost = renderCost(o.cost);
+      let modal = new Modal('You can\'t afford this', `This costs ${cost}`);
     }
   };
+
+  fn.obj = isConstructor(cls) ? new cls() : cls;
+  return fn;
 }
 
 // --- THINGS & BONUSES
@@ -185,30 +202,64 @@ class Grid {
         if (obj) {
           let neighbors = [];
           if (x>0) {
-            neighbors.push(this.grid[x-1][y]);
+            neighbors.push({
+              x: x-1,
+              y: y,
+              item: this.grid[x-1][y]
+            });
             if (y>0) {
-              neighbors.push(this.grid[x-1][y-1]);
+              neighbors.push({
+                x: x-1,
+                y: y-1,
+                item: this.grid[x-1][y-1]
+              });
             }
             if (y<this.nRows-1) {
-              neighbors.push(this.grid[x-1][y+1]);
+              neighbors.push({
+                x: x-1,
+                y: y+1,
+                item: this.grid[x-1][y+1]
+              });
             }
           }
           if (x<this.nCols-1) {
-            neighbors.push(this.grid[x+1][y]);
+            neighbors.push({
+              x: x+1,
+              y: y,
+              item: this.grid[x+1][y]
+            });
             if (y>0) {
-              neighbors.push(this.grid[x+1][y-1]);
+              neighbors.push({
+                x: x+1,
+                y: y-1,
+                item: this.grid[x+1][y-1]
+              });
             }
             if (y<this.nRows-1) {
-              neighbors.push(this.grid[x+1][y+1]);
+              neighbors.push({
+                x: x+1,
+                y: y+1,
+                item: this.grid[x+1][y+1]
+              });
             }
           }
           if (y>0) {
-            neighbors.push(this.grid[x][y-1]);
+            neighbors.push({
+              x: x,
+              y: y-1,
+              item: this.grid[x][y-1]
+            });
           }
           if (y<this.nRows-1) {
-            neighbors.push(this.grid[x][y+1]);
+            neighbors.push({
+              x: x,
+              y: y+1,
+              item: this.grid[x][y+1]
+            });
           }
-          obj.update(neighbors.filter(x => x));
+          // obj.update(neighbors.filter(x => x));
+          // include all neighbors
+          obj.update(neighbors);
         }
       });
     });
@@ -379,6 +430,7 @@ class Button {
   constructor(text, onClick) {
     this.text = text;
     this.onClick = onClick;
+    this.obj = this.onClick.obj;
   }
 
   render() {
@@ -389,7 +441,18 @@ class Button {
       ev.stopPropagation();
       overlay.style.display = 'none';
       this.onClick();
+      tooltip.style.display = 'none';
     });
+    if (this.obj) {
+      let cost = renderCost(this.obj.cost);
+      bEl.addEventListener('mouseenter', (ev) => {
+        tooltip.style.display = 'block';
+        tooltip.innerText = `Costs: ${cost}`;
+      });
+      bEl.addEventListener('mouseleave', (ev) => {
+        tooltip.style.display = 'none';
+      });
+    }
     return bEl;
   }
 }
