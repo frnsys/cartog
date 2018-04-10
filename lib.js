@@ -25,6 +25,10 @@ function numberWithCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
+function isConstructor(obj) {
+  return !!obj.prototype && !!obj.prototype.constructor.name;
+}
+
 // --- RESOURCES
 
 // a harvester is a function that
@@ -66,7 +70,12 @@ function buy(obj) {
 // that just involve buying things
 function tryBuy(cls, onSuccess) {
   return () => {
-    let o = new cls();
+    let o;
+    if (isConstructor(cls)) {
+      o = new cls();
+    } else {
+      o = cls;
+    }
     if (buy(o)) {
       if (o instanceof Item) {
         GAME.selected = o;
