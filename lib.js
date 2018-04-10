@@ -104,7 +104,6 @@ class Timer {
 function pause() {
   GAME.paused = true;
   GAME.timers.forEach((t) => t.pause());
-  console.log(GAME.timers[0]);
 }
 
 function resume() {
@@ -506,15 +505,9 @@ class Button {
 
   render() {
     let bEl = document.createElement('div');
+    let enabled = true;
     bEl.classList.add('button');
     bEl.innerHTML = this.text;
-    bEl.addEventListener('click', (ev) => {
-      ev.stopPropagation();
-      overlay.style.display = 'none';
-      tooltip.style.display = 'none';
-      this.onClick();
-      resume();
-    });
     if (this.obj) {
       let cost = stringifyCost(this.obj.cost);
       bEl.addEventListener('mouseenter', (ev) => {
@@ -524,6 +517,19 @@ class Button {
       bEl.addEventListener('mouseleave', (ev) => {
         tooltip.style.display = 'none';
       });
+      enabled = canAfford(this.obj);
+    }
+
+    if (enabled) {
+      bEl.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        overlay.style.display = 'none';
+        tooltip.style.display = 'none';
+        this.onClick();
+        resume();
+      });
+    } else {
+      bEl.style.opacity = 0.1;
     }
     return bEl;
   }
