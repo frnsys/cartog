@@ -46,14 +46,15 @@ function isConstructor(obj) {
   return !!obj.prototype && !!obj.prototype.constructor.name;
 }
 
-function stringifyCost(cost) {
+function stringifyCost(cost, delimiter) {
+  delimiter = delimiter || ', ';
   let costs = [];
   Object.keys(cost).forEach((k) => {
     let name = RESOURCES[k] || k;
     let body = `${name} ${numberWithCommas(cost[k])}`;
     costs.push(body);
   });
-  return costs.join(', ');
+  return costs.join(delimiter);
 }
 
 // --- TIME
@@ -154,18 +155,21 @@ function buy(obj) {
 function tryBuy(cls) {
   let fn = () => {
     let o = isConstructor(cls) ? new cls() : cls;
-    if (buy(o)) {
-      if (o instanceof Item) {
-        GAME.selected = o;
-      } else if (o instanceof Bonus) {
-        if (o.effect) o.effect();
+
+    // Items are bought on placement
+    if (o instanceof Item) {
+      GAME.selected = o;
+      GAME.selectedCls = cls;
+
+    // everything else (Actions & Bonuses)
+    // are bought on click
+    } else if (buy(o)) {
+      if (o instanceof Bonus) {
         GAME.bonuses.push(o.name);
-      } else if (o.effect) {
+      }
+      if (o.effect) {
         o.effect();
       }
-    } else {
-      let cost = stringifyCost(o.cost);
-      let modal = new Modal('You can\'t afford this', `This costs ${cost}`);
     }
   };
 
@@ -388,11 +392,16 @@ class Grid {
     if (obj) {
       obj.onClick();
     } else if (GAME.selected) {
-      let coord = this.convertCoord(x, y);
-      let x_ = coord[0];
-      let y_ = coord[1];
-      this.place(GAME.selected, x_, y_);
-      if (GAME.selected.onPlace) GAME.selected.onPlace;
+      if (buy(GAME.selected)) {
+        let obj = new GAME.selectedCls();
+        let coord = this.convertCoord(x, y);
+        let x_ = coord[0];
+        let y_ = coord[1];
+        this.place(obj, x_, y_);
+        if (obj.onPlace) obj.onPlace;
+      } else {
+        showMessage(`You can't afford this (${stringifyCost(GAME.selected.cost)})`);
+      }
     }
   }
 
@@ -529,7 +538,7 @@ class Button {
         resume();
       });
     } else {
-      bEl.style.opacity = 0.1;
+      bEl.style.opacity = 0.2;
     }
     return bEl;
   }
@@ -600,6 +609,23 @@ class Action extends BuyButton {
   }
 };
 
+function imageWithAlpha(src, alpha) {
+  let buf = createImage(src.width, src.height);
+  let img = createImage(src.width, src.height);
+
+  buf.loadPixels();
+  for(var x = 0; x < buf.width; x++) {
+    for(var y = 0; y < buf.height; y++) {
+      buf.set(x, y, [0, 0, 0, alpha]);
+    }
+  }
+  buf.updatePixels();
+
+  img.copy(src, 0, 0, src.width, src.height, 0, 0, img.width, img.height);
+  img.mask(buf);
+  return img;
+}
+
 // --- P5JS
 
 function setup() {
@@ -622,6 +648,7 @@ function preload() {
 }
 
 function draw() {
+  textAlign(LEFT, TOP);
   main();
   if (!GAME.paused) {
     GAME.grid.update();
@@ -634,7 +661,16 @@ function draw() {
   // draw selected item
   if (GAME.selected) {
     let fname = GAME.selected.image
-    image(GAME.images[fname], mouseX, mouseY, GAME.grid.cellSize, GAME.grid.cellSize);
+    let img = GAME.images[fname];
+    image(img, mouseX, mouseY, GAME.grid.cellSize, GAME.grid.cellSize);
+    if (!canAfford(GAME.selected)) {
+      let g = createGraphics(GAME.grid.cellSize, GAME.grid.cellSize);
+      g.noStroke();
+      g.fill(255, 0, 0, 128);
+      g.rect(0, 0, GAME.grid.cellSize, GAME.grid.cellSize);
+      image(g, mouseX, mouseY, GAME.grid.cellSize, GAME.grid.cellSize);
+    }
+    text(stringifyCost(GAME.selected.cost, '\n'), mouseX, mouseY + GAME.grid.cellSize + 6);
   }
 }
 
