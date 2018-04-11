@@ -22,9 +22,40 @@ tooltip.style.display = 'none';
 tooltip.style.zIndex = '10';
 this.addEventListener('mousemove', (ev) => {
   tooltip.style.left = `${ev.pageX + 5}px`;
-  tooltip.style.top = `${ev.pageY + 5}px`;
+
+  let top = ev.pageY + 5;
+  if (tooltip.clientHeight + top > window.innerHeight) {
+    top -= tooltip.clientHeight;
+  }
+  tooltip.style.top = `${top}px`;
 });
 document.body.appendChild(tooltip);
+
+// setup bonuses list
+const bonuses = document.createElement('div');
+bonuses.classList.add('bonuses');
+bonuses.style.position = 'absolute';
+bonuses.style.padding = '0.3em 0.6em';
+bonuses.style.bottom = '0'
+bonuses.style.left = '0'
+document.body.appendChild(bonuses);
+
+function saveBonus(bonus) {
+  let bEl = document.createElement('div');
+  bEl.innerText = bonus.name;
+  useTooltip(bEl, bonus.description);
+  bonuses.appendChild(bEl);
+}
+
+function useTooltip(el, text) {
+  el.addEventListener('mouseenter', (ev) => {
+    tooltip.style.display = 'block';
+    tooltip.innerText = text;
+  });
+  el.addEventListener('mouseleave', (ev) => {
+    tooltip.style.display = 'none';
+  });
+}
 
 // --- UTIL
 
@@ -166,6 +197,7 @@ function tryBuy(cls) {
     } else if (buy(o)) {
       if (o instanceof Bonus) {
         GAME.bonuses.push(o.name);
+        saveBonus(o);
       }
       if (o.effect) {
         o.effect();
@@ -180,8 +212,9 @@ function tryBuy(cls) {
 // --- THINGS & BONUSES
 
 class Bonus {
-  constructor(name, cost, effect) {
+  constructor(name, description, cost, effect) {
     this.name = name;
+    this.description = description;
     this.effect = effect;
     this.cost = cost;
   }
@@ -519,13 +552,11 @@ class Button {
     bEl.innerHTML = this.text;
     if (this.obj) {
       let cost = stringifyCost(this.obj.cost);
-      bEl.addEventListener('mouseenter', (ev) => {
-        tooltip.style.display = 'block';
-        tooltip.innerText = `Costs: ${cost}`;
-      });
-      bEl.addEventListener('mouseleave', (ev) => {
-        tooltip.style.display = 'none';
-      });
+      if (!this.obj.description) {
+        useTooltip(bEl, `Costs: ${cost}`);
+      } else {
+        useTooltip(bEl, `${this.obj.description} (${cost})`);
+      }
       enabled = canAfford(this.obj);
     }
 
@@ -631,6 +662,9 @@ function imageWithAlpha(src, alpha) {
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
   GAME.grid = new Grid(GRID_HEIGHT, GRID_WIDTH, GRID_CELL_SIZE);
+
+
+
   init();
 }
 
