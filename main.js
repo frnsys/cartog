@@ -1,140 +1,220 @@
+'use strict';
+
+const IMAGES = {
+	wheat: 'https://i.imgur.com/ythxt2c.jpg',
+	sparse_wheat: 'https://i.imgur.com/lCIe5lH.jpg',
+	aqueduct: 'http://i.imgur.com/WtI3uue.jpg',
+	sick_wolf: 'https://i.imgur.com/kpuLqAv.jpg',
+  pig: 'https://kids.nationalgeographic.com/content/dam/kids/photos/animals/Mammals/H-P/pig-young-closeup.ngsversion.1412640764383.jpg',
+	wolf: 'https://static01.nyt.com/images/2017/10/17/science/17SCI-WOLVES7/17SCI-WOLVES7-superJumbo.jpg'
+};
+
 const GRID_HEIGHT = 400;
 const GRID_WIDTH = 400;
-const GRID_CELL_SIZE = 40;
-const GRID_EMPTY = [205, 244, 222];
+const GRID_CELL_SIZE = 80;
+const GRID_EMPTY = [247, 245, 165];
 
 const RESOURCES = {
-  cash: '💵',
-  water: '🚰'
-};
+	water: '🌊',
+	nitrogen: '💩',
+	money: '💵'
+}
 
 const STATE = {
-  resources: {
-    cash: 100,
-    water: 100
-  },
-  waterCollectors: 0
-};
-
-const IMAGES = [
-  'assets/wheat_0.jpg',
-  'assets/wheat_1.jpg',
-  'assets/wheat_2.jpg',
-  'assets/water_collector.jpg'
-];
+	resources: {
+		water: 100,
+		nitrogen: 50,
+		money: 0
+	},
+	cashPerCrop: 100,
+	investment: 0,
+	aqueducts: 0
+}
 
 
-class Wheat extends Thing {
-  init() {
-    this.yield = 3;
-  }
+class Wolf extends Item {
+	init() {
+		this.sick = false;
+	}
 
-  get cost() {
-    return {
-      'cash': 100,
-      'water': 50
-    }
-  }
+  // no cost, can't buy wolves
+	get cost() {
+		return {}
+	}
 
-  get image() {
-    if (this.sick) {
-      return 'wheat_2.jpg';
-    } else if (this.level == 0) {
-      return 'wheat_0.jpg';
-    } else if (this.level == 1) {
-      return 'wheat_1.jpg';
-    }
-  }
+	get info() {
+		return 'grrrr....'
+	}
 
-  get info() {
-    if (this.sick) {
-      return 'This wheat is not good you better get rid of it'
-    } else {
-      return 'This is some wheat';
-    }
-  }
+	get image() {
+		if (this.sick) {
+			return 'sick_wolf'
+		} else {
+			return 'wolf'
+		}
+	}
 
-  update(neighbors) {
-    if (frameCount % 120 != 0) {
-      return
-    }
-    let spoil_probability = 0.01;
-    neighbors.forEach((n) => {
-      if (n instanceof Wheat) {
-        if (n.sick) {
-          spoil_probability += 0.02;
-        }
-      }
-    });
-    if (Math.random() < spoil_probability) {
-      this.sick = true;
-    }
+	update(neighbors) {
+		var self = this;
+		neighbors.forEach(function(neighbor) {
+			if (neighbor.item instanceof Aqueduct) {
+        // with 5% chance, wolves get sick
+        // and die in 5 seconds
+				if (Math.random() < 0.05) {
+					self.sick = true;
+					schedule(5000, function() {
+						self.destroy();
+					})
+				}
+			}
+		})
+	}
+}
 
-    // wheat takes water
-    if (STATE.resources.water < 2) {
-      this.yield--;
-      if (this.yield <= 0) {
-        this.destroy();
-        showMessage('Some wheat died from lack of water', color=[255,0,0])
-      }
-    } else {
-      STATE.resources.water -= 2;
-    }
-  }
 
-  onClick() {
-    if (this.sick) {
-      this.destroy();
-    } else {
-      STATE.resources.cash += 100;
-      this.yield--;
-      showMessage('Harvested!');
-      if (this.yield <= 0) {
-        this.destroy();
-      }
-    }
+class Pig extends Item {
+	get cost() {
+		return {
+			money: 5
+		}
+	}
+
+	get info() {
+		return 'piggy'
+	}
+
+	get image() {
+		return 'pig'
+	}
+
+	update(neighbors) {
+    // pigs expand to adjacent wheat plots
+    // with 1% probability
+		neighbors.forEach(function(neighbor) {
+			if (neighbor.item instanceof Wheat) {
+				if (Math.random() < 0.01) {
+					var pig = new Pig();
+					GAME.grid.place(pig, neighbor.x, neighbor.y);
+				}
+			}
+		})
+
+    // wolves spawn on pigs with
+    // a 0.5% probability
+		if (Math.random() < 0.005) {
+			var wolf = new Wolf();
+			this.destroy();
+			GAME.grid.place(wolf, this.x, this.y);
+		}
+	}
+}
+
+
+class Aqueduct extends Item {
+	get cost() {
+		return {
+			money: 25
+		}
+	}
+
+	get info() {
+		return 'Cool aqueduct'
+	}
+
+	get image() {
+		return 'aqueduct'
+	}
+
+  onPlace() {
+    STATE.aqueducts++;
   }
 }
 
 
-class WaterCollector extends Thing {
-  get cost() {
-    return {
-      'cash': 50
-    }
-  }
+class Wheat extends Item {
+	init() {
+		this.quantity = 3;
+	}
 
-  get info() {
-    return 'What a handy device (+2 water/sec)';
-  }
+	get cost() {
+		return {
+			water: 20,
+			nitrogen: 5
+		}
+	}
 
-  get image() {
-    return 'water_collector.jpg';
-  }
+	get info() {
+		if (this.quantity < 2) {
+			return 'This wheat is almost gone!'
+		} else if (this.quantity < 3) {
+			return 'This wheat is running low'
+		} else {
+			return 'This is some nice wheat'
+		}
+	}
 
-  onClick() {
-    this.destroy();
-    STATE.waterCollectors -= 1;
-  }
+	get image() {
+		if (this.quantity < 3) {
+			return 'sparse_wheat'
+		} else {
+			return 'wheat'
+		}
+	}
+
+	onClick() {
+		this.quantity -= 1;
+		STATE.resources.money += STATE.cashPerCrop;
+		if (this.quantity <= 0) {
+			this.destroy();
+			showMessage('You lost some wheat!')
+			showMessage('that sucks')
+		}
+	}
 }
 
-var wheat;
+
+var tractorBonus = new Bonus(
+  'Powerful Tractor',
+  'A more powerful tractor', {
+		money: 50
+	}, function() {
+		STATE.cashPerCrop += 100;
+	});
+
+var investmentBonus = new Bonus(
+  'Roth IRA',
+  'Make your money work for you', {
+		money: 100
+	}, function() {
+		STATE.investment = 0.1;
+	});
+
+
 function init() {
-  wheat = new Wheat();
-  GAME.grid.place(wheat, 0, 0);
-  defineHarvester('water', () => {
-    return 1 + STATE.waterCollectors * 2;
-  }, 1000);
+	var wheat = new Wheat();
+	GAME.grid.place(wheat, 0, 0);
 
-  let menu = new Menu('Farm Mall', [
-    new Button('Buy Water Collector', tryBuy(WaterCollector, () => {
-      STATE.waterCollectors += 1;
-      showMessage('Bought water collector!');
-    })),
-    new Button('Buy Wheat', tryBuy(Wheat))
-  ]);
+	var menu = new Menu('Farm Mall', [
+		new BuyButton('Buy wheat', Wheat),
+		new BuyButton('Buy pig', Pig),
+		new BuyButton('Buy aqueduct', Aqueduct),
+		new BuyButton('Upgrade tractor', tractorBonus),
+		new BuyButton('Open Roth IRA', investmentBonus)
+	]);
+
+	defineHarvester('water', function() {
+		return 2 * STATE.aqueducts;
+	}, 2000)
+
+	defineHarvester('water', function() {
+		return -1;
+	}, 2000);
+
+  defineHarvester('money', function() {
+    return STATE.resources.money * STATE.investment;
+  }, 2000);
 }
 
 function main() {
-  background(240,240,240);
+	background(58, 170, 80);
 }
