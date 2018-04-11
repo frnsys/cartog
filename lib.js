@@ -686,10 +686,9 @@ function windowResized() {
 }
 
 function preload() {
-  IMAGES.forEach((path) => {
-    let parts = path.split('/');
-    let fname = parts[parts.length - 1];
-    GAME.images[fname] = loadImage(path);
+  Object.keys(IMAGES).forEach((k) => {
+    let path = IMAGES[k];
+    GAME.images[k] = loadImage(path);
   });
 }
 
