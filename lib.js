@@ -398,7 +398,7 @@ class Grid {
         let x_ = coord[0];
         let y_ = coord[1];
         this.place(obj, x_, y_);
-        if (obj.onPlace) obj.onPlace;
+        if (obj.onPlace) obj.onPlace();
       } else {
         showMessage(`You can't afford this (${stringifyCost(GAME.selected.cost)})`);
       }
