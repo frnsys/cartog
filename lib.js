@@ -11,52 +11,6 @@ const GAME = {
   paused: false
 };
 
-// setup tooltip for buttons
-const tooltip = document.createElement('div');
-tooltip.classList.add('tooltip');
-tooltip.style.position = 'absolute';
-tooltip.style.padding = '0.3em 0.6em';
-tooltip.style.background = '#333';
-tooltip.style.color = '#fff';
-tooltip.style.display = 'none';
-tooltip.style.zIndex = '10';
-this.addEventListener('mousemove', (ev) => {
-  tooltip.style.left = `${ev.pageX + 5}px`;
-
-  let top = ev.pageY + 5;
-  if (tooltip.clientHeight + top > window.innerHeight) {
-    top -= tooltip.clientHeight;
-  }
-  tooltip.style.top = `${top}px`;
-});
-document.body.appendChild(tooltip);
-
-// setup bonuses list
-const bonuses = document.createElement('div');
-bonuses.classList.add('bonuses');
-bonuses.style.position = 'absolute';
-bonuses.style.padding = '0.3em 0.6em';
-bonuses.style.bottom = '0'
-bonuses.style.left = '0'
-document.body.appendChild(bonuses);
-
-function saveBonus(bonus) {
-  let bEl = document.createElement('div');
-  bEl.innerText = bonus.name;
-  useTooltip(bEl, bonus.description);
-  bonuses.appendChild(bEl);
-}
-
-function useTooltip(el, text) {
-  el.addEventListener('mouseenter', (ev) => {
-    tooltip.style.display = 'block';
-    tooltip.innerText = text;
-  });
-  el.addEventListener('mouseleave', (ev) => {
-    tooltip.style.display = 'none';
-  });
-}
-
 // --- UTIL
 
 // schedule a function to be run every ms millseconds
@@ -191,6 +145,7 @@ function tryBuy(cls) {
     if (o instanceof Item) {
       GAME.selected = o;
       GAME.selectedCls = cls;
+      return true;
 
     // everything else (Actions & Bonuses)
     // are bought on click
@@ -202,7 +157,9 @@ function tryBuy(cls) {
       if (o.effect) {
         o.effect();
       }
+      return true;
     }
+    return false;
   };
 
   fn.obj = isConstructor(cls) ? new cls() : cls;
@@ -530,8 +487,10 @@ class Menu {
     buttons.push(new Button('Close', () => {}));
 
     buttons.forEach((b) => {
-      let bEl = b.render();
-      el.appendChild(bEl);
+      if (b.show()) {
+        let bEl = b.render();
+        el.appendChild(bEl);
+      }
     });
 
     renderModal(el);
@@ -539,10 +498,11 @@ class Menu {
 }
 
 class Button {
-  constructor(text, onClick) {
+  constructor(text, onClick, showPredicate) {
     this.text = text;
     this.onClick = onClick;
     this.obj = this.onClick.obj;
+    this.show = showPredicate || (() => true);
   }
 
   render() {
@@ -576,8 +536,17 @@ class Button {
 }
 
 class BuyButton extends Button {
-  constructor(text, cls) {
-    super(text, tryBuy(cls));
+  constructor(text, cls, showPredicate) {
+    // bonuses can only be purchased once,
+    // if the bonus is already owned,
+    // don't show the buttons for it
+    showPredicate = showPredicate || (() => {
+      if (cls instanceof Bonus && hasBonus(cls.name)) {
+        return false;
+      }
+      return true;
+    })
+    super(text, tryBuy(cls), showPredicate);
   }
 }
 
@@ -657,14 +626,57 @@ function imageWithAlpha(src, alpha) {
   return img;
 }
 
+// setup tooltip for buttons
+const tooltip = document.createElement('div');
+tooltip.classList.add('tooltip');
+tooltip.style.position = 'absolute';
+tooltip.style.padding = '0.3em 0.6em';
+tooltip.style.background = '#333';
+tooltip.style.color = '#fff';
+tooltip.style.display = 'none';
+tooltip.style.zIndex = '10';
+this.addEventListener('mousemove', (ev) => {
+  tooltip.style.left = `${ev.pageX + 5}px`;
+
+  let top = ev.pageY + 5;
+  if (tooltip.clientHeight + top > window.innerHeight) {
+    top -= tooltip.clientHeight;
+  }
+  tooltip.style.top = `${top}px`;
+});
+document.body.appendChild(tooltip);
+
+// setup bonuses list
+const bonuses = document.createElement('div');
+bonuses.classList.add('bonuses');
+bonuses.style.position = 'absolute';
+bonuses.style.padding = '0.3em 0.6em';
+bonuses.style.bottom = '0'
+bonuses.style.left = '0'
+document.body.appendChild(bonuses);
+
+function saveBonus(bonus) {
+  let bEl = document.createElement('div');
+  bEl.innerText = bonus.name;
+  useTooltip(bEl, bonus.description);
+  bonuses.appendChild(bEl);
+}
+
+function useTooltip(el, text) {
+  el.addEventListener('mouseenter', (ev) => {
+    tooltip.style.display = 'block';
+    tooltip.innerText = text;
+  });
+  el.addEventListener('mouseleave', (ev) => {
+    tooltip.style.display = 'none';
+  });
+}
+
 // --- P5JS
 
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
   GAME.grid = new Grid(GRID_HEIGHT, GRID_WIDTH, GRID_CELL_SIZE);
-
-
-
   init();
 }
 
