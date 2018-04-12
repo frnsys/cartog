@@ -4,6 +4,7 @@ const GAME = {
   messages: [],
   harvesters: [],
   images: {},
+  alphaImages: {},
   bonuses: [],
   timers: [],
   tooltip: null,
@@ -238,6 +239,8 @@ class Grid {
     this.width = width;
     this.height = height;
     this.cellSize = cellSize;
+    this.cellWidth = cellSize;
+    this.cellHeight = cellSize;
     this.nCols = width/cellSize;
     this.nRows = height/cellSize;
 
@@ -321,18 +324,18 @@ class Grid {
   }
 
   renderCell(cell, x, y) {
-    let x_ = x*this.cellSize;
-    let y_ = y*this.cellSize;
+    let x_ = x*this.cellWidth;
+    let y_ = y*this.cellHeight;
     this.g.fill(...cell.color);
     if (cell.item) {
-      cell.item.render(this.g, x_, y_, this.cellSize, this.cellSize);
+      cell.item.render(this.g, x_, y_, this.cellWidth, this.cellHeight);
     } else {
-      this.g.rect(x_, y_, x_+this.cellSize, y_+this.cellSize);
+      this.g.rect(x_, y_, x_+this.cellWidth, y_+this.cellHeight);
     }
   }
 
   render() {
-    this.g.background(0,0,0);
+    this.g.background(0,0,0,0);
     this.g.strokeWeight(0.2);
     this.grid.forEach((row, x) => {
       row.forEach((cell, y) => {
@@ -358,8 +361,8 @@ class Grid {
     // translate to internal coordinates
     let x_ = x - this.x;
     let y_ = y - this.y;
-    x_ = floor(x_/this.cellSize);
-    y_ = floor(y_/this.cellSize);
+    x_ = floor(x_/this.cellWidth);
+    y_ = floor(y_/this.cellHeight);
     return [x_, y_];
   }
 
@@ -402,6 +405,45 @@ class Grid {
 
   remove(x, y) {
     this.grid[x][y].item = null;
+  }
+}
+
+
+function makeHexagon(g, x, y, size) {
+  g.beginShape();
+  for (var i=0; i<6; i++) {
+    let angle_deg = 60 * i + 30;
+    let angle_rad = PI / 180 * angle_deg;
+    let vx = x + size * cos(angle_rad);
+    let vy = y + size * sin(angle_rad);
+    g.vertex(vx, vy);
+  }
+  g.endShape(CLOSE);
+  return g;
+}
+
+class HexGrid extends Grid {
+  constructor(width, height, cellSize) {
+    super(width, height, cellSize);
+    this.size = this.cellSize/2;
+    this.cellHeight = this.size * 2;
+    this.cellWidth = sqrt(3)/2 * this.cellHeight;
+    this.mask = createGraphics(this.cellWidth, this.cellHeight);
+    this.mask = makeHexagon(this.mask, this.cellWidth/2, this.cellHeight/2, this.size);
+  }
+
+  renderCell(cell, x, y) {
+    let x_ = x*this.cellWidth + this.cellWidth/2;
+    let y_ = y*(this.cellHeight*3/4) + this.cellHeight/2;
+    if (y % 2 == 1) {
+      x_ += this.cellWidth/2;
+    }
+    this.g.fill(...cell.color);
+    if (cell.item) {
+      cell.item.render(this.g, x_-this.cellWidth/2, y_-this.cellHeight/2, this.cellWidth, this.cellHeight);
+    } else {
+      makeHexagon(this.g, x_, y_, this.size);
+    }
   }
 }
 
@@ -693,7 +735,24 @@ function useTooltip(el, text) {
 
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
-  GAME.grid = new Grid(GRID_HEIGHT, GRID_WIDTH, GRID_CELL_SIZE);
+  if (GRID_MODE === 'hex') {
+    GAME.grid = new HexGrid(GRID_HEIGHT, GRID_WIDTH, GRID_CELL_SIZE);
+
+    // pre-mask images as needed
+    // so they aren't re-masked every frame
+    // (much better performance)
+    Object.keys(GAME.images).forEach((k) => {
+      GAME.images[k].mask(GAME.grid.mask);
+    });
+  } else {
+    GAME.grid = new Grid(GRID_HEIGHT, GRID_WIDTH, GRID_CELL_SIZE);
+  }
+
+  // pre-compute images with alpha
+  Object.keys(GAME.images).forEach((k) => {
+    GAME.alphaImages[k] = imageWithAlpha(GAME.images[k], 100);
+  });
+
   init();
 }
 
@@ -722,17 +781,13 @@ function draw() {
 
   // draw selected item
   if (GAME.selected) {
-    let fname = GAME.selected.image
-    let img = GAME.images[fname];
-    image(img, mouseX, mouseY, GAME.grid.cellSize, GAME.grid.cellSize);
+    let name = GAME.selected.image
+    let img = GAME.images[name];
     if (!canAfford(GAME.selected)) {
-      let g = createGraphics(GAME.grid.cellSize, GAME.grid.cellSize);
-      g.noStroke();
-      g.fill(255, 0, 0, 128);
-      g.rect(0, 0, GAME.grid.cellSize, GAME.grid.cellSize);
-      image(g, mouseX, mouseY, GAME.grid.cellSize, GAME.grid.cellSize);
+      img = GAME.alphaImages[name];
     }
-    text(stringifyCost(GAME.selected.cost, '\n'), mouseX, mouseY + GAME.grid.cellSize + 6);
+    image(img, mouseX, mouseY, GAME.grid.cellWidth, GAME.grid.cellHeight);
+    text(stringifyCost(GAME.selected.cost, '\n'), mouseX, mouseY + GAME.grid.cellHeight + 6);
   }
 }
 
