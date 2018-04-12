@@ -1,0 +1,43 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: sans-serif;
+}
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  background: rgba(255,255,255,0.5);
+  display: none;
+}
+.modal {
+  width: 400px;
+  margin: 2em auto;
+  background: #ddd;
+  border: 1px solid #ccc;
+  padding: 2em;
+  text-align: center;
+}
+.modal h1 {
+  margin: 0 0 1em 0;
+  font-size: 1.2em;
+  font-weight: normal;
+}
+.modal .button {
+  margin-bottom: 1em;
+}
+.button {
+  color: #fff;
+  background: blue;
+  cursor: pointer;
+  padding: 1em;
+}
+#menus {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+}

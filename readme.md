@@ -85,6 +85,7 @@ You can optionally implement:
 
 - `init()`: called when the item is first created. You can, for example, setup some initial values for the item.
 - `onPlace()`: called when the item is placed onto the grid. You can, for example, use this to keep track of how many of this item has been purchased.
+- `onDestroy()`: called when the item is destroyed/removed from the grid.
 - `update(neighbors)`: called every frame and is passed an array of the item's [Moore neighbors](https://en.wikipedia.org/wiki/Moore_neighborhood) in the grid, if any. You can use this, for instance, for cellular automata dynamics and the like (e.g. a blight spreading through a field of crops).
 
 Some built-in methods you'll likely use:

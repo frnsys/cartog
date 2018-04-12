@@ -11,6 +11,15 @@ const GAME = {
   paused: false
 };
 
+// setup UI elements
+const overlay = document.createElement('div');
+document.body.appendChild(overlay);
+overlay.id = 'overlay';
+
+const menus = document.createElement('div');
+document.body.appendChild(menus);
+menus.id = 'menus';
+
 // --- UTIL
 
 // schedule a function to be run every ms millseconds
@@ -198,15 +207,15 @@ class Item {
 
   destroy() {
     this.grid.remove(this.x, this.y);
+    this.onDestroy();
   }
 
   onClick() {
     throw Error('Not implemented');
   }
 
-  onPlace() {
-    throw Error('Not implemented');
-  }
+  onPlace() {}
+  onDestroy() {}
 
   get info() {
     throw Error('Not implemented');
@@ -467,7 +476,6 @@ class Menu {
     this.title = title;
     this.buttons = buttons;
 
-    let menus = document.getElementById('menus');
     let menuButton = document.createElement('div');
     menuButton.classList.add('button');
     menuButton.innerHTML = this.title;
@@ -582,7 +590,6 @@ class Modal {
 }
 
 function renderModal(child) {
-  let overlay = document.getElementById('overlay');
   while (overlay.firstChild) {
     overlay.removeChild(overlay.firstChild);
   }
