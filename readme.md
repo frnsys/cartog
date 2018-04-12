@@ -12,9 +12,9 @@ This is an early first version that will evolve as the needs of the class become
 
 # Example
 
-See `index.html` and `main.js`.
+See the `example` folder.
 
-![](shot.png)
+![(outdated)](shot.png)
 
 # Setup
 
