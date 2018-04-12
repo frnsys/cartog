@@ -125,7 +125,7 @@ class Pig extends Item {
 					var pig = new Pig();
 
           // Place the Pig where the Wheat was
-					GAME.grid.place(pig, neighbor.x, neighbor.y);
+					place(pig, neighbor.x, neighbor.y);
 				}
 			}
 		})
@@ -140,7 +140,7 @@ class Pig extends Item {
 			this.destroy();
 
       // Place the Wolf where this Pig was
-			GAME.grid.place(wolf, this.x, this.y);
+			place(wolf, this.x, this.y);
 		}
 	}
 }
@@ -275,7 +275,7 @@ var investmentBonus = new Bonus(
 function init() {
   // Create a starting wheat plot
 	var wheat = new Wheat();
-	GAME.grid.place(wheat, 0, 0);
+	place(wheat, 0, 0);
   STATE.wheats += 1;
 
   // Setup the Menu for buying stuff

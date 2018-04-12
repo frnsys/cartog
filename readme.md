@@ -148,6 +148,7 @@ The main functions you'll probably use are:
 - `defineHarvester(name, fn, ms)`: sets a function `fn` to be called every `ms` milliseconds. The function is expected to return a number, which is used to modify the resource named `name`.
 - `every(fn, ms)`: call the function `fn` every `ms` milliseconds.
 - `schedule(fn, ms)`: call the function `fn` once in `ms` milliseconds.
+- `place(item, x, y)`: places an item onto the grid.
 
 # UI
 
