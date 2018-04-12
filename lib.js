@@ -234,6 +234,7 @@ class Item {
 
 class Grid {
   constructor(width, height, cellSize) {
+    this.offset = {x: 0, y: 0};
     this.width = width;
     this.height = height;
     this.cellSize = cellSize;
@@ -278,73 +279,56 @@ class Grid {
     this.grid[x][y] = cell;
   }
 
+  neighborPositionsAt(x, y) {
+    let positions = [];
+    if (x > 0) {
+      positions.push([x-1, y]);
+      if (y > 0) positions.push([x-1, y-1]);
+      if (y<this.nRows-1) positions.push([x-1, y+1]);
+    }
+    if (x<this.nCols-1) {
+      positions.push([x+1, y]);
+      if (y>0) positions.push([x+1, y-1]);
+      if (y<this.nRows-1) positions.push([x+1, y+1]);
+    }
+    if (y>0) positions.push([x, y-1]);
+    if (y<this.nRows-1) positions.push([x, y+1]);
+    return positions;
+  }
+
+  neighborsAt(x, y) {
+    return this.neighborPositionsAt(x, y).map((pos) => {
+      let cell = this.cellAt(pos[0], pos[1]);
+      return {
+        x: pos[0],
+        y: pos[1],
+        cell: cell,
+        item: cell.item,
+      };
+    });
+  }
+
   update() {
     this.grid.forEach((row, x) => {
       row.forEach((cell, y) => {
         let item = cell.item;
         if (item) {
-          let neighbors = [];
-          if (x>0) {
-            neighbors.push({
-              x: x-1,
-              y: y,
-              item: this.grid[x-1][y]
-            });
-            if (y>0) {
-              neighbors.push({
-                x: x-1,
-                y: y-1,
-                item: this.grid[x-1][y-1]
-              });
-            }
-            if (y<this.nRows-1) {
-              neighbors.push({
-                x: x-1,
-                y: y+1,
-                item: this.grid[x-1][y+1]
-              });
-            }
-          }
-          if (x<this.nCols-1) {
-            neighbors.push({
-              x: x+1,
-              y: y,
-              item: this.grid[x+1][y]
-            });
-            if (y>0) {
-              neighbors.push({
-                x: x+1,
-                y: y-1,
-                item: this.grid[x+1][y-1]
-              });
-            }
-            if (y<this.nRows-1) {
-              neighbors.push({
-                x: x+1,
-                y: y+1,
-                item: this.grid[x+1][y+1]
-              });
-            }
-          }
-          if (y>0) {
-            neighbors.push({
-              x: x,
-              y: y-1,
-              item: this.grid[x][y-1]
-            });
-          }
-          if (y<this.nRows-1) {
-            neighbors.push({
-              x: x,
-              y: y+1,
-              item: this.grid[x][y+1]
-            });
-          }
-          // include all neighbors
+          let neighbors = this.neighborsAt(x, y);
           item.update(neighbors);
         }
       });
     });
+  }
+
+  renderCell(cell, x, y) {
+    let x_ = x*this.cellSize;
+    let y_ = y*this.cellSize;
+    this.g.fill(...cell.color);
+    if (cell.item) {
+      cell.item.render(this.g, x_, y_, this.cellSize, this.cellSize);
+    } else {
+      this.g.rect(x_, y_, x_+this.cellSize, y_+this.cellSize);
+    }
   }
 
   render() {
@@ -352,19 +336,12 @@ class Grid {
     this.g.strokeWeight(0.2);
     this.grid.forEach((row, x) => {
       row.forEach((cell, y) => {
-        let x_ = x*this.cellSize;
-        let y_ = y*this.cellSize;
-        this.g.fill(...cell.color);
-        if (cell.item) {
-          cell.item.render(this.g, x_, y_, this.cellSize, this.cellSize);
-        } else {
-          this.g.rect(x_, y_, x_+this.cellSize, y_+this.cellSize);
-        }
+        this.renderCell(cell, x, y);
       });
     });
 
-    this.x = window.innerWidth/2 - this.width/2;
-    this.y = window.innerHeight/2 - this.height/2;
+    this.x = window.innerWidth/2 - this.width/2 + this.offset.x;
+    this.y = window.innerHeight/2 - this.height/2 + this.offset.y;
     renderGraphic(this.g, this.x, this.y);
   }
 
@@ -770,10 +747,26 @@ function mouseMoved() {
   }
 }
 
+function mousePressed() {
+  // for tracking dragging
+  GAME.lastMouseX = mouseX;
+  GAME.lastMouseY = mouseY;
+}
+
 function mouseClicked() {
   if (GAME.grid && GAME.grid.inside(mouseX, mouseY)) {
     GAME.grid.clickCell(mouseX, mouseY);
   } else {
     GAME.selected = null;
   }
+}
+
+function mouseDragged() {
+  // make grid draggable
+  let mouseXDiff = mouseX - GAME.lastMouseX;
+  let mouseYDiff = mouseY - GAME.lastMouseY;
+  GAME.lastMouseX = mouseX;
+  GAME.lastMouseY = mouseY;
+  GAME.grid.offset.x += mouseXDiff;
+  GAME.grid.offset.y += mouseYDiff;
 }
