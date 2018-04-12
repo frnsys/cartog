@@ -137,6 +137,38 @@ So each `Action` takes an action name, a cost, and a function that describes wha
 
 Note that `Event`s pause the game.
 
+# Grid
+
+You may want to have different kinds of cells in the grid, e.g. some cells are water and can't have items placed in them, or certain items can only be placed on certain cells.
+
+You can define custom cells for the grid by subclassing `Cell`. This subclasses can implement `get color` to return a `[r,g,b]` color for the cell and `canPlace(item)` which determines whether or not a given item can be placed on the cell.
+
+Then use the cell at a grid position, create an instance of it and use `grid.setCellAt(cell, x, y)`.
+
+For example:
+
+```
+class WaterCell extends Cell {
+  constructor(depth) {
+    super();
+    this.depth = depth;
+  }
+
+  get color() {
+      return [0, 0, 20*this.depth];
+  }
+
+  canPlace(item) {
+    return false;
+  }
+}
+
+// ...
+
+let water = new WaterCell(5);
+GAME.grid.setCellAt(water, 0, 0);
+```
+
 # Helper functions
 
 The main functions you'll probably use are:

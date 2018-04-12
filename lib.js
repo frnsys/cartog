@@ -123,22 +123,22 @@ function defineHarvester(name, fn, time) {
 
 // --- BUYING
 
-function canAfford(obj) {
-  if (obj.cost) {
-    return Object.keys(obj.cost).every((k) => {
-      return STATE.resources[k] >= obj.cost[k];
+function canAfford(item) {
+  if (item.cost) {
+    return Object.keys(item.cost).every((k) => {
+      return STATE.resources[k] >= item.cost[k];
     });
   }
   return true;
 }
 
-function buy(obj) {
-  if (!canAfford(obj)) {
+function buy(item) {
+  if (!canAfford(item)) {
     return false;
   }
-  if (obj.cost) {
-    Object.keys(obj.cost).forEach((k) => {
-      STATE.resources[k] -= obj.cost[k];
+  if (item.cost) {
+    Object.keys(item.cost).forEach((k) => {
+      STATE.resources[k] -= item.cost[k];
     });
   }
   return true;
@@ -171,7 +171,7 @@ function tryBuy(cls) {
     return false;
   };
 
-  fn.obj = isConstructor(cls) ? new cls() : cls;
+  fn.item = isConstructor(cls) ? new cls() : cls;
   return fn;
 }
 
@@ -246,26 +246,43 @@ class Grid {
     for (let i=0; i<this.nCols; i++) {
       this.grid[i] = [];
       for (let j=0; j<this.nRows; j++) {
-        this.grid[i].push(null);
+        let cell = new Cell();
+        cell.x = j;
+        cell.y = i;
+        this.grid[i].push(cell);
       }
     }
 
     this.g = createGraphics(this.width, this.height);
   }
 
-  // place an object at x, y
-  // will overwrite previous object
-  place(obj, x, y) {
-    this.grid[x][y] = obj;
-    obj.x = x;
-    obj.y = y;
-    obj.grid = this;
+  // place an item at x, y
+  // will overwrite previous item
+  place(item, x, y) {
+    // TODO should this check cell.canPlace?
+    // or assume if you're using this, override?
+    let cell = this.cellAt(x, y);
+    cell.item = item;
+    item.x = x;
+    item.y = y;
+    item.grid = this;
+  }
+
+  cellAt(x, y) {
+    return this.grid[x][y];
+  }
+
+  setCellAt(cell, x, y) {
+    cell.x = x;
+    cell.y = y;
+    this.grid[x][y] = cell;
   }
 
   update() {
     this.grid.forEach((row, x) => {
-      row.forEach((obj, y) => {
-        if (obj) {
+      row.forEach((cell, y) => {
+        let item = cell.item;
+        if (item) {
           let neighbors = [];
           if (x>0) {
             neighbors.push({
@@ -323,9 +340,8 @@ class Grid {
               item: this.grid[x][y+1]
             });
           }
-          // obj.update(neighbors.filter(x => x));
           // include all neighbors
-          obj.update(neighbors);
+          item.update(neighbors);
         }
       });
     });
@@ -333,14 +349,14 @@ class Grid {
 
   render() {
     this.g.background(0,0,0);
-    this.g.fill(...GRID_EMPTY);
     this.g.strokeWeight(0.2);
     this.grid.forEach((row, x) => {
-      row.forEach((obj, y) => {
+      row.forEach((cell, y) => {
         let x_ = x*this.cellSize;
         let y_ = y*this.cellSize;
-        if (obj) {
-          obj.render(this.g, x_, y_, this.cellSize, this.cellSize);
+        this.g.fill(...cell.color);
+        if (cell.item) {
+          cell.item.render(this.g, x_, y_, this.cellSize, this.cellSize);
         } else {
           this.g.rect(x_, y_, x_+this.cellSize, y_+this.cellSize);
         }
@@ -370,7 +386,7 @@ class Grid {
     return [x_, y_];
   }
 
-  cellAt(x, y) {
+  cellAtPx(x, y) {
     let coord = this.convertCoord(x, y);
     let x_ = coord[0];
     let y_ = coord[1];
@@ -378,26 +394,29 @@ class Grid {
   }
 
   enterCell(x, y) {
-    let obj = this.cellAt(x, y);
-    if (obj && obj.info) {
-      GAME.tooltip = obj.info;
+    let cell = this.cellAtPx(x, y);
+    if (cell.item && cell.item.info) {
+      GAME.tooltip = cell.item.info;
     } else {
       GAME.tooltip = null;
     }
   }
 
   clickCell(x, y) {
-    let obj = this.cellAt(x, y);
-    if (obj) {
-      obj.onClick();
+    let cell = this.cellAtPx(x, y);
+    if (cell.item) {
+      cell.item.onClick();
     } else if (GAME.selected) {
-      if (buy(GAME.selected)) {
-        let obj = new GAME.selectedCls();
+      if (!cell.canPlace(GAME.selected)) {
+        showMessage('This can\'t be placed here');
+        return;
+      } else if (buy(GAME.selected)) {
+        let item = new GAME.selectedCls();
         let coord = this.convertCoord(x, y);
         let x_ = coord[0];
         let y_ = coord[1];
-        this.place(obj, x_, y_);
-        if (obj.onPlace) obj.onPlace();
+        this.place(item, x_, y_);
+        if (item.onPlace) item.onPlace();
       } else {
         showMessage(`You can't afford this (${stringifyCost(GAME.selected.cost)})`);
       }
@@ -405,14 +424,28 @@ class Grid {
   }
 
   remove(x, y) {
-    this.grid[x][y] = null;
+    this.grid[x][y].item = null;
+  }
+}
+
+class Cell {
+  constructor() {
+    this.item = null;
+  }
+
+  get color() {
+    return GRID_EMPTY;
+  }
+
+  canPlace(item) {
+    return true;
   }
 }
 
 // convenience method for placing
 // on the game grid
-function place(obj, x, y) {
-  GAME.grid.place(obj, x, y);
+function place(item, x, y) {
+  GAME.grid.place(item, x, y);
 }
 
 // --- UI
@@ -509,7 +542,7 @@ class Button {
   constructor(text, onClick, showPredicate) {
     this.text = text;
     this.onClick = onClick;
-    this.obj = this.onClick.obj;
+    this.item = this.onClick.item;
     this.show = showPredicate || (() => true);
   }
 
@@ -518,14 +551,14 @@ class Button {
     let enabled = true;
     bEl.classList.add('button');
     bEl.innerHTML = this.text;
-    if (this.obj) {
-      let cost = stringifyCost(this.obj.cost);
-      if (!this.obj.description) {
+    if (this.item) {
+      let cost = stringifyCost(this.item.cost);
+      if (!this.item.description) {
         useTooltip(bEl, `Costs: ${cost}`);
       } else {
-        useTooltip(bEl, `${this.obj.description} (${cost})`);
+        useTooltip(bEl, `${this.item.description} (${cost})`);
       }
-      enabled = canAfford(this.obj);
+      enabled = canAfford(this.item);
     }
 
     if (enabled) {
