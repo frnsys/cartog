@@ -414,8 +414,8 @@ function makeHexagon(g, x, y, size) {
   for (var i=0; i<6; i++) {
     let angle_deg = 60 * i + 30;
     let angle_rad = PI / 180 * angle_deg;
-    let vx = x + size * cos(angle_rad);
-    let vy = y + size * sin(angle_rad);
+    let vx = x + size * Math.cos(angle_rad);
+    let vy = y + size * Math.sin(angle_rad);
     g.vertex(vx, vy);
   }
   g.endShape(CLOSE);
@@ -427,7 +427,7 @@ class HexGrid extends Grid {
     super(rows, cols, cellSize);
     this.size = this.cellSize/2;
     this.cellHeight = this.size * 2;
-    this.cellWidth = sqrt(3)/2 * this.cellHeight;
+    this.cellWidth = Math.sqrt(3)/2 * this.cellHeight;
     this.mask = createGraphics(this.cellWidth, this.cellHeight);
     this.mask = makeHexagon(this.mask, this.cellWidth/2, this.cellHeight/2, this.size);
     this.width = cols * this.cellWidth;
@@ -482,19 +482,19 @@ class HexGrid extends Grid {
 
     // ty <https://www.redblobgames.com/grids/hexagons/>
     // to axial
-    let q = (x * sqrt(3)/3 - y / 3) / this.size;
+    let q = (x * Math.sqrt(3)/3 - y / 3) / this.size;
     let r = y * 2/3 /this.size;
 
     // to cube
     let z = r;
     x = q;
     y = -x-z;
-    let rx = round(x);
-    let ry = round(y);
-    let rz = round(z);
-    let x_diff = abs(rx - x);
-    let y_diff = abs(ry - y);
-    let z_diff = abs(rz - z);
+    let rx = Math.round(x);
+    let ry = Math.round(y);
+    let rz = Math.round(z);
+    let x_diff = Math.abs(rx - x);
+    let y_diff = Math.abs(ry - y);
+    let z_diff = Math.abs(rz - z);
     if (x_diff > y_diff && x_diff > z_diff) {
       rx = -ry-rz;
     } else if (y_diff > z_diff) {
@@ -803,7 +803,9 @@ function setup() {
     // so they aren't re-masked every frame
     // (much better performance)
     Object.keys(GAME.images).forEach((k) => {
-      GAME.images[k].mask(GAME.grid.mask);
+      let img = GAME.images[k];
+      // mask to hex shape
+      img.mask(GAME.grid.mask);
     });
   } else {
     GAME.grid = new Grid(GRID_ROWS, GRID_COLS, GRID_CELL_SIZE);
@@ -811,7 +813,10 @@ function setup() {
 
   // pre-compute images with alpha
   Object.keys(GAME.images).forEach((k) => {
-    GAME.alphaImages[k] = imageWithAlpha(GAME.images[k], 100);
+    let img = GAME.images[k];
+    // resize to size needed, for performance reasons
+    img.resize(GAME.grid.cellWidth, GAME.grid.cellHeight);
+    GAME.alphaImages[k] = imageWithAlpha(img, 100);
   });
 
   init();
