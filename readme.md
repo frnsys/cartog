@@ -55,8 +55,8 @@ const IMAGES = {
 Other values you need to define that configure the 2D grid:
 
 ```
-const GRID_HEIGHT = 400;
-const GRID_WIDTH = 400;
+const GRID_ROWS = 10;
+const GRID_COLS = 10;
 const GRID_CELL_SIZE = 40;
 const GRID_EMPTY = [205, 244, 222];
 ```
@@ -138,6 +138,14 @@ So each `Action` takes an action name, a cost, and a function that describes wha
 Note that `Event`s pause the game.
 
 # Grid
+
+By default, the grid is a square-based grid. You can use a hex-based grid instead by specifying:
+
+```
+const GRID_TYPE = 'hex';
+```
+
+## Grid cells
 
 You may want to have different kinds of cells in the grid, e.g. some cells are water and can't have items placed in them, or certain items can only be placed on certain cells.
 

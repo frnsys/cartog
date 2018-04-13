@@ -11,10 +11,11 @@ const IMAGES = {
 };
 
 // REQUIRED: configure the grid
-const GRID_HEIGHT = 400;
-const GRID_WIDTH = 400;
+const GRID_ROWS = 10;
+const GRID_COLS = 10;
 const GRID_CELL_SIZE = 80;
 const GRID_EMPTY = [247, 245, 165];
+const GRID_TYPE = 'hex';
 
 // REQUIRED: define how our resources will be represented
 const RESOURCES = {
