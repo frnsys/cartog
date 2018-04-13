@@ -234,15 +234,15 @@ class Item {
 // --- GRID
 
 class Grid {
-  constructor(width, height, cellSize) {
+  constructor(rows, cols, cellSize) {
     this.offset = {x: 0, y: 0};
-    this.width = width;
-    this.height = height;
     this.cellSize = cellSize;
     this.cellWidth = cellSize;
     this.cellHeight = cellSize;
-    this.nCols = width/cellSize;
-    this.nRows = height/cellSize;
+    this.nCols = cols;
+    this.nRows = rows;
+    this.width = cols * this.cellWidth;
+    this.height = rows * this.cellHeight;
 
     // initialize null grid of
     // dimensions width x height
@@ -349,12 +349,7 @@ class Grid {
   }
 
   inside(x, y) {
-    // check if the given (x,y) position
-    // is inside the rectangle.
-    // assumes no rotation!
-    let in_x = x > this.x && x < this.x + this.width;
-    let in_y = y > this.y && y < this.y + this.height;
-    return in_x && in_y;
+    return x >= 0 && x < this.nCols && y >= 0 && y < this.nRows;
   }
 
   convertCoord(x, y) {
@@ -370,20 +365,24 @@ class Grid {
     let coord = this.convertCoord(x, y);
     let x_ = coord[0];
     let y_ = coord[1];
-    return this.grid[x_][y_];
+    if (this.inside(x_, y_)) {
+      return this.grid[x_][y_];
+    }
+    return undefined;
   }
 
   enterCell(x, y) {
     let cell = this.cellAtPx(x, y);
-    if (cell.item && cell.item.info) {
-      GAME.tooltip = cell.item.info;
-    } else {
-      GAME.tooltip = null;
+    if (cell && cell.item && cell.item.info) {
+      GAME.tooltip = renderTooltip(cell.item.info);
+      return true;
     }
+    return false;
   }
 
   clickCell(x, y) {
     let cell = this.cellAtPx(x, y);
+    if (!cell) return false;
     if (cell.item) {
       cell.item.onClick();
     } else if (GAME.selected) {
@@ -401,6 +400,7 @@ class Grid {
         showMessage(`You can't afford this (${stringifyCost(GAME.selected.cost)})`);
       }
     }
+    return true;
   }
 
   remove(x, y) {
@@ -423,13 +423,15 @@ function makeHexagon(g, x, y, size) {
 }
 
 class HexGrid extends Grid {
-  constructor(width, height, cellSize) {
-    super(width, height, cellSize);
+  constructor(rows, cols, cellSize) {
+    super(rows, cols, cellSize);
     this.size = this.cellSize/2;
     this.cellHeight = this.size * 2;
     this.cellWidth = sqrt(3)/2 * this.cellHeight;
     this.mask = createGraphics(this.cellWidth, this.cellHeight);
     this.mask = makeHexagon(this.mask, this.cellWidth/2, this.cellHeight/2, this.size);
+    this.width = cols * this.cellWidth;
+    this.height = rows * this.cellHeight;
   }
 
   renderCell(cell, x, y) {
@@ -444,6 +446,67 @@ class HexGrid extends Grid {
     } else {
       makeHexagon(this.g, x_, y_, this.size);
     }
+  }
+
+  neighborPositionsAt(x, y) {
+    let positions = [];
+
+    if (y % 2 == 0) {
+      if (x > 0) {
+        positions.push([x-1, y]);
+        if (y > 0) positions.push([x-1,y-1]);
+        if (y < this.nRows-1) positions.push([x-1,y+1]);
+      }
+      if (x < this.nCols-1) {
+        positions.push([x+1, y]);
+        if (y > 0) positions.push([x+1,y-1]);
+        if (y < this.nRows-1) positions.push([x+1,y+1]);
+      }
+    } else {
+      if (x > 0) positions.push([x-1, y]);
+      if (x < this.nCols-1) {
+        positions.push([x+1, y]);
+        if (y > 0) positions.push([x+1, y-1]);
+        if (y < this.nRows-1) positions.push([x+1, y+1]);
+      }
+      if (y > 0) positions.push([x, y-1]);
+      if (y < this.nRows-1) positions.push([x, y+1]);
+    }
+    return positions;
+  }
+
+  convertCoord(x, y) {
+    // translate to internal coordinates
+    x = x - this.x - this.cellWidth/2;
+    y = y - this.y - this.cellHeight/2;
+
+    // ty <https://www.redblobgames.com/grids/hexagons/>
+    // to axial
+    let q = (x * sqrt(3)/3 - y / 3) / this.size;
+    let r = y * 2/3 /this.size;
+
+    // to cube
+    let z = r;
+    x = q;
+    y = -x-z;
+    let rx = round(x);
+    let ry = round(y);
+    let rz = round(z);
+    let x_diff = abs(rx - x);
+    let y_diff = abs(ry - y);
+    let z_diff = abs(rz - z);
+    if (x_diff > y_diff && x_diff > z_diff) {
+      rx = -ry-rz;
+    } else if (y_diff > z_diff) {
+      ry = -rx-rz;
+    } else {
+      rz = -rx-ry;
+    }
+
+    // to offset
+    let col = rx + (rz - (rz&1)) / 2
+    let row = rz
+    return [col, row];
   }
 }
 
@@ -510,17 +573,15 @@ function renderResources(top, right, size) {
   });
 }
 
-function renderTooltip(size, padding) {
+function renderTooltip(text, size, padding) {
+  size = size || 16;
   padding = padding || 10;
-  if (!GAME.tooltip) {
-    return;
-  }
-  let width = textWidth(GAME.tooltip);
+  let width = textWidth(text);
   let g = createGraphics(width + padding*2, size + padding*2 - size/2);
   g.fill(255,255,255);
   g.background(30,30,30);
-  g.text(GAME.tooltip, padding, padding + size/2);
-  renderGraphic(g, mouseX, mouseY);
+  g.text(text, padding, padding + size/2);
+  return g;
 }
 
 class Menu {
@@ -736,7 +797,7 @@ function useTooltip(el, text) {
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
   if (GRID_MODE === 'hex') {
-    GAME.grid = new HexGrid(GRID_HEIGHT, GRID_WIDTH, GRID_CELL_SIZE);
+    GAME.grid = new HexGrid(GRID_ROWS, GRID_COLS, GRID_CELL_SIZE);
 
     // pre-mask images as needed
     // so they aren't re-masked every frame
@@ -745,7 +806,7 @@ function setup() {
       GAME.images[k].mask(GAME.grid.mask);
     });
   } else {
-    GAME.grid = new Grid(GRID_HEIGHT, GRID_WIDTH, GRID_CELL_SIZE);
+    GAME.grid = new Grid(GRID_ROWS, GRID_COLS, GRID_CELL_SIZE);
   }
 
   // pre-compute images with alpha
@@ -777,7 +838,9 @@ function draw() {
   GAME.grid.render();
   renderMessages(10, 10);
   renderResources(10, 10);
-  renderTooltip(16);
+  if (GAME.tooltip) {
+    renderGraphic(GAME.tooltip, mouseX, mouseY);
+  }
 
   // draw selected item
   if (GAME.selected) {
@@ -795,10 +858,10 @@ function draw() {
 // --- INTERACTION
 
 function mouseMoved() {
-  if (GAME.grid && GAME.grid.inside(mouseX, mouseY)) {
-    GAME.grid.enterCell(mouseX, mouseY);
-  } else {
-    GAME.tooltip = null;
+  if (GAME.grid) {
+    if (!GAME.grid.enterCell(mouseX, mouseY)) {
+      GAME.tooltip = null;
+    }
   }
 }
 
@@ -809,10 +872,10 @@ function mousePressed() {
 }
 
 function mouseClicked() {
-  if (GAME.grid && GAME.grid.inside(mouseX, mouseY)) {
-    GAME.grid.clickCell(mouseX, mouseY);
-  } else {
-    GAME.selected = null;
+  if (GAME.grid) {
+    if (!GAME.grid.clickCell(mouseX, mouseY)) {
+      GAME.selected = null;
+    }
   }
 }
 
