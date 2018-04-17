@@ -796,7 +796,7 @@ function useTooltip(el, text) {
 
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
-  if (GRID_TYPE === 'hex') {
+  if (typeof GRID_TYPE !== 'undefined' && GRID_TYPE === 'hex') {
     GAME.grid = new HexGrid(GRID_ROWS, GRID_COLS, GRID_CELL_SIZE);
 
     // pre-mask images as needed
