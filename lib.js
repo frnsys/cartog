@@ -13,9 +13,9 @@ const GAME = {
 };
 
 // setup UI elements
-const overlay = document.createElement('div');
-document.body.appendChild(overlay);
-overlay.id = 'overlay';
+const overlayEl = document.createElement('div');
+document.body.appendChild(overlayEl);
+overlayEl.id = 'overlay';
 
 const menus = document.createElement('div');
 document.body.appendChild(menus);
@@ -644,7 +644,7 @@ class Button {
     if (enabled) {
       bEl.addEventListener('click', (ev) => {
         ev.stopPropagation();
-        overlay.style.display = 'none';
+        overlayEl.style.display = 'none';
         tooltip.style.display = 'none';
         this.onClick();
         resume();
@@ -703,15 +703,15 @@ class Modal {
 }
 
 function renderModal(child) {
-  while (overlay.firstChild) {
-    overlay.removeChild(overlay.firstChild);
+  while (overlayEl.firstChild) {
+    overlayEl.removeChild(overlayEl.firstChild);
   }
   let el = document.createElement('div');
   el.classList.add('modal');
   el.appendChild(child);
 
-  overlay.appendChild(el);
-  overlay.style.display = 'block';
+  overlayEl.appendChild(el);
+  overlayEl.style.display = 'block';
 }
 
 function renderGraphic(g, x, y) {
