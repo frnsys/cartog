@@ -17,9 +17,9 @@ const overlayEl = document.createElement('div');
 document.body.appendChild(overlayEl);
 overlayEl.id = 'overlay';
 
-const menus = document.createElement('div');
-document.body.appendChild(menus);
-menus.id = 'menus';
+const menusEl = document.createElement('div');
+document.body.appendChild(menusEl);
+menusEl.id = 'menus';
 
 // --- UTIL
 
@@ -593,7 +593,7 @@ class Menu {
     menuButton.classList.add('button');
     menuButton.innerHTML = this.title;
     menuButton.addEventListener('click', () => this.render());
-    menus.appendChild(menuButton);
+    menusEl.appendChild(menuButton);
   }
 
   render() {
