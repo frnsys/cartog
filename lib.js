@@ -399,6 +399,8 @@ class Grid {
       } else {
         showMessage(`You can't afford this (${stringifyCost(GAME.selected.cost)})`);
       }
+    } else {
+      cell.onClick();
     }
     return true;
   }
@@ -522,6 +524,8 @@ class Cell {
   canPlace(item) {
     return true;
   }
+
+  onClick() {}
 }
 
 // convenience method for placing

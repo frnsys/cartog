@@ -149,7 +149,7 @@ const GRID_TYPE = 'hex';
 
 You may want to have different kinds of cells in the grid, e.g. some cells are water and can't have items placed in them, or certain items can only be placed on certain cells.
 
-You can define custom cells for the grid by subclassing `Cell`. This subclasses can implement `get color` to return a `[r,g,b]` color for the cell and `canPlace(item)` which determines whether or not a given item can be placed on the cell.
+You can define custom cells for the grid by subclassing `Cell`. This subclasses can implement `get color` to return a `[r,g,b]` color for the cell, `canPlace(item)` which determines whether or not a given item can be placed on the cell, and `onClick()` which is called when the cell is clicked with no item on it.
 
 Then use the cell at a grid position, create an instance of it and use `grid.setCellAt(cell, x, y)`.
 
