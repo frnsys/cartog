@@ -148,7 +148,7 @@ const GRID_TYPE = 'hex';
 By default, the grid is draggable. If you want to disable draggability, you can set:
 
 ```
-GRID_DRAG = false;
+const GRID_DRAG = false;
 ```
 
 ## Grid cells
