@@ -215,3 +215,19 @@ One thing of note with the `Menu` class it that when you create a new `Menu`, it
 The `Modal` class is very similar to the `Menu` class, but as the name suggests more appropriate for modals/popups.
 
 Note that all `Modal`s and `Menu`s pause the game.
+
+# Meters
+
+You can create percentage meters with the `Meter` class:
+
+```
+let meter = new Meter('Meter Name', 10);
+```
+
+Where the second parameter is the initial value, which should be between 0 and 100.
+
+To update the value of the meter:
+
+```
+meter.update(50);
+```
