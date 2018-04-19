@@ -253,8 +253,8 @@ class Grid {
       this.grid[i] = [];
       for (let j=0; j<this.nRows; j++) {
         let cell = new defaultCell();
-        cell.x = j;
-        cell.y = i;
+        cell.x = i;
+        cell.y = j;
         this.grid[i].push(cell);
       }
     }
@@ -531,7 +531,10 @@ class HexGrid extends Grid {
 class Cell {
   constructor() {
     this.item = null;
+    this.init();
   }
+
+  init() {}
 
   get info() {}
   update(neighbors) {}
