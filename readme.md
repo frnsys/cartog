@@ -145,6 +145,12 @@ By default, the grid is a square-based grid. You can use a hex-based grid instea
 const GRID_TYPE = 'hex';
 ```
 
+By default, the grid is draggable. If you want to disable draggability, you can set:
+
+```
+GRID_DRAG = false;
+```
+
 ## Grid cells
 
 You may want to have different kinds of cells in the grid, e.g. some cells are water and can't have items placed in them, or certain items can only be placed on certain cells.

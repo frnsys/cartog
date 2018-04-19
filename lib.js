@@ -1,5 +1,6 @@
 'use strict';
 
+let GRID_DRAG = true;
 const GAME = {
   meters: [],
   messages: [],
@@ -955,6 +956,9 @@ function mouseDragged() {
   let mouseYDiff = mouseY - GAME.lastMouseY;
   GAME.lastMouseX = mouseX;
   GAME.lastMouseY = mouseY;
-  GAME.grid.offset.x += mouseXDiff;
-  GAME.grid.offset.y += mouseYDiff;
+
+  if (GRID_DRAG) {
+    GAME.grid.offset.x += mouseXDiff;
+    GAME.grid.offset.y += mouseYDiff;
+  }
 }
