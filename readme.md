@@ -187,6 +187,12 @@ let water = new WaterCell(5);
 GAME.grid.setCellAt(water, 0, 0);
 ```
 
+You can also specify one of these classes as the default cell for the grid:
+
+```
+const GRID_DEFAULT_CELL = WaterCell;
+```
+
 # Helper functions
 
 The main functions you'll probably use are:

@@ -235,7 +235,8 @@ class Item {
 // --- GRID
 
 class Grid {
-  constructor(rows, cols, cellSize) {
+  constructor(rows, cols, cellSize, defaultCell) {
+    defaultCell = defaultCell || Cell;
     this.offset = {x: 0, y: 0};
     this.cellSize = cellSize;
     this.cellWidth = cellSize;
@@ -251,7 +252,7 @@ class Grid {
     for (let i=0; i<this.nCols; i++) {
       this.grid[i] = [];
       for (let j=0; j<this.nRows; j++) {
-        let cell = new Cell();
+        let cell = new defaultCell();
         cell.x = j;
         cell.y = i;
         this.grid[i].push(cell);
@@ -426,8 +427,8 @@ function makeHexagon(g, x, y, size) {
 }
 
 class HexGrid extends Grid {
-  constructor(rows, cols, cellSize) {
-    super(rows, cols, cellSize);
+  constructor(rows, cols, cellSize, defaultCell) {
+    super(rows, cols, cellSize, defaultCell);
     this.size = this.cellSize/2;
     this.cellHeight = this.size * 2;
     this.cellWidth = Math.sqrt(3)/2 * this.cellHeight;
@@ -860,8 +861,9 @@ function useTooltip(el, text) {
 
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
+  let defaultCell = typeof GRID_DEFAULT_CELL === 'undefined' ? Cell : GRID_DEFAULT_CELL;
   if (typeof GRID_TYPE !== 'undefined' && GRID_TYPE === 'hex') {
-    GAME.grid = new HexGrid(GRID_ROWS, GRID_COLS, GRID_CELL_SIZE);
+    GAME.grid = new HexGrid(GRID_ROWS, GRID_COLS, GRID_CELL_SIZE, defaultCell);
 
     // pre-mask images as needed
     // so they aren't re-masked every frame
@@ -872,7 +874,7 @@ function setup() {
       img.mask(GAME.grid.mask);
     });
   } else {
-    GAME.grid = new Grid(GRID_ROWS, GRID_COLS, GRID_CELL_SIZE);
+    GAME.grid = new Grid(GRID_ROWS, GRID_COLS, GRID_CELL_SIZE, defaultCell);
   }
 
   // pre-compute images with alpha
