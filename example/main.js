@@ -1,5 +1,20 @@
 'use strict';
 
+class WaterCell extends Cell {
+  constructor() {
+    super();
+    this.depth = Math.random() * 100;
+  }
+
+  get color() {
+    return [0,0, 255 * 1/Math.sqrt(this.depth)];
+  }
+
+  get info() {
+    return `this is water at depth ${Math.round(this.depth)}`;
+  }
+}
+
 // REQUIRED: define images we want to use
 const IMAGES = {
   wheat: 'https://i.imgur.com/ythxt2c.jpg',
@@ -16,6 +31,7 @@ const GRID_COLS = 10;
 const GRID_CELL_SIZE = 80;
 const GRID_EMPTY = [247, 245, 165];
 const GRID_TYPE = 'hex';
+const GRID_DEFAULT_CELL = WaterCell;
 
 // REQUIRED: define how our resources will be represented
 const RESOURCES = {

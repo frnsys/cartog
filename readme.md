@@ -157,9 +157,12 @@ You may want to have different kinds of cells in the grid, e.g. some cells are w
 
 You can define custom cells for the grid by subclassing `Cell`. This subclasses can implement:
 
-- `get color` to return a `[r,g,b]` color for the cell
+- `get color()` to return a `[r,g,b]` color for the cell
+- `get info()` to return tooltip info for the cell, similar to an `Item`
+- `get image()`: this should return the name of the image used to represent this cell, similar to an `Item`
 - `canPlace(item)` which determines whether or not a given item can be placed on the cell
 - `onClick()` which is called when the cell is clicked with no item on it
+- `update(neighbors)`: same as `Item.update(neighbors)`, refer to that description
 
 Then use the cell at a grid position, create an instance of it and use `grid.setCellAt(cell, x, y)`.
 
@@ -173,7 +176,11 @@ class WaterCell extends Cell {
   }
 
   get color() {
-      return [0, 0, 20*this.depth];
+    return [0,0, 255 * 1/Math.sqrt(this.depth)];
+  }
+
+  get info() {
+    return `this is water at depth ${Math.round(this.depth)}`;
   }
 
   canPlace(item) {

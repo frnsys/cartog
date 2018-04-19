@@ -5,7 +5,7 @@ const GAME = {
   messages: [],
   harvesters: [],
   images: {},
-  alphaImages: {},
+  alphaImageCache: {},
   bonuses: [],
   timers: [],
   tooltip: null,
@@ -317,10 +317,11 @@ class Grid {
     this.grid.forEach((row, x) => {
       row.forEach((cell, y) => {
         let item = cell.item;
+        let neighbors = this.neighborsAt(x, y);
         if (item) {
-          let neighbors = this.neighborsAt(x, y);
           item.update(neighbors);
         }
+        cell.update(neighbors);
       });
     });
   }
@@ -332,7 +333,11 @@ class Grid {
     if (cell.item) {
       cell.item.render(this.g, x_, y_, this.cellWidth, this.cellHeight);
     } else {
-      this.g.rect(x_, y_, x_+this.cellWidth, y_+this.cellHeight);
+      if (cell.image) {
+        cell.render(this.g, x_, y_, this.cellWidth, this.cellHeight);
+      } else {
+        this.g.rect(x_, y_, x_+this.cellWidth, y_+this.cellHeight);
+      }
     }
   }
 
@@ -375,9 +380,14 @@ class Grid {
 
   enterCell(x, y) {
     let cell = this.cellAtPx(x, y);
-    if (cell && cell.item && cell.item.info) {
-      GAME.tooltip = renderTooltip(cell.item.info);
-      return true;
+    if (cell) {
+      if (cell.item && cell.item.info) {
+        GAME.tooltip = renderTooltip(cell.item.info);
+        return true;
+      } else if (!cell.item && cell.info) {
+        GAME.tooltip = renderTooltip(cell.info);
+        return true;
+      }
     }
     return false;
   }
@@ -448,7 +458,11 @@ class HexGrid extends Grid {
     if (cell.item) {
       cell.item.render(this.g, x_-this.cellWidth/2, y_-this.cellHeight/2, this.cellWidth, this.cellHeight);
     } else {
-      makeHexagon(this.g, x_, y_, this.size);
+      if (cell.image) {
+        cell.render(this.g, x_-this.cellWidth/2, y_-this.cellHeight/2, this.cellWidth, this.cellHeight);
+      } else {
+        makeHexagon(this.g, x_, y_, this.size);
+      }
     }
   }
 
@@ -519,8 +533,19 @@ class Cell {
     this.item = null;
   }
 
+  get info() {}
+  update(neighbors) {}
+
   get color() {
     return GRID_EMPTY;
+  }
+
+  get image() {}
+
+  render(g, x, y, w, h) {
+    let name = this.image;
+    let im = GAME.images[name];
+    g.image(im, x, y, w, h);
   }
 
   canPlace(item) {
@@ -882,7 +907,7 @@ function setup() {
     let img = GAME.images[k];
     // resize to size needed, for performance reasons
     img.resize(GAME.grid.cellWidth, GAME.grid.cellHeight);
-    GAME.alphaImages[k] = imageWithAlpha(img, 100);
+    GAME.alphaImageCache[k] = imageWithAlpha(img, 100);
   });
 
   init();
@@ -919,7 +944,7 @@ function draw() {
     let name = GAME.selected.image
     let img = GAME.images[name];
     if (!canAfford(GAME.selected)) {
-      img = GAME.alphaImages[name];
+      img = GAME.alphaImageCache[name];
     }
     image(img, mouseX, mouseY, GAME.grid.cellWidth, GAME.grid.cellHeight);
     text(stringifyCost(GAME.selected.cost, '\n'), mouseX, mouseY + GAME.grid.cellHeight + 6);
