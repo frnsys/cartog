@@ -604,6 +604,10 @@ class Menu {
     menusEl.appendChild(menuButton);
   }
 
+  addButton(button) {
+    this.buttons.push(button);
+  }
+
   render() {
     pause();
     let el = document.createElement('div');
