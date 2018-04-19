@@ -690,35 +690,48 @@ class Meter {
     this.textSize = 12;
     this.spacing = 2;
     this.barHeight = 16;
-    this.width = 120
+    this.barWidth = 120;
+    this.width = Math.max(this.barWidth, textWidth(name));
     this.height = this.barHeight + this.textSize + this.spacing;
     this.g = createGraphics(this.width, this.height);
     this.fillColor = fillColor || [255,0,0];
     this.bgColor = bgColor || [50,50,50];
     this.update(init);
+
+    // draw the text once
+    this.g.textSize(this.textSize);
+    this.g.textAlign(LEFT, TOP);
+    this.g.fill(...this.bgColor);
+    this.g.text(this.name, 0, this.barHeight + this.spacing);
+
     GAME.meters.push(this);
   }
 
   // val should be in [0, 100];
   update(val) {
+    val = Math.max(Math.min(val, 100), 0);
     if (val !== this.val) {
       this.val = val;
       this.g.noStroke();
       this.g.fill(...this.bgColor);
-      this.g.rect(0, 0, this.width, this.barHeight);
+      this.g.rect(0, 0, this.barWidth, this.barHeight);
       this.g.fill(...this.fillColor);
-      this.g.rect(0, 0, this.width*(this.val/100), this.barHeight);
-      this.g.textSize(this.textSize);
-      this.g.textAlign(LEFT, TOP);
-      this.g.fill(...this.bgColor);
-      this.g.text(this.name, 0, this.barHeight + this.spacing);
+      this.g.rect(0, 0, this.barWidth*(this.val/100), this.barHeight);
     }
   }
 }
 
-function renderMeters(top, right) {
+function renderMeters() {
+  let spacing = 10;
+  let totalSpacing = spacing * (GAME.meters.length - 1);
+  let width = totalSpacing + GAME.meters.reduce((acc, val) => {
+    return acc + val.width;
+  }, 0);
+  let left = window.innerWidth/2 - width/2;
+  let offset = 0;
   GAME.meters.forEach((m, i) => {
-    renderGraphic(m.g, top, right);
+    renderGraphic(m.g, left + offset, 10);
+    offset += m.width + spacing;
   });
 }
 
@@ -894,7 +907,7 @@ function draw() {
   GAME.grid.render();
   renderMessages(10, 10);
   renderResources(10, 10);
-  renderMeters(10, 10);
+  renderMeters();
   if (GAME.tooltip) {
     renderGraphic(GAME.tooltip, mouseX, mouseY);
   }

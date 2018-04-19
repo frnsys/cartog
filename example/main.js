@@ -272,6 +272,8 @@ var investmentBonus = new Bonus(
   });
 
 
+var meter1, meter2;
+
 // Initial setup of the game
 function init() {
   // Create a starting wheat plot
@@ -308,11 +310,14 @@ function init() {
     return STATE.resources.money * STATE.investment;
   }, 2000);
 
-  var meter = new Meter('Test Meter', 10);
+  meter1 = new Meter('Test Meter', 10);
+  meter2 = new Meter('Another meter', 50);
 }
+
 
 // The game's main loop.
 // We're just using it to set a background color
 function main() {
   background(58, 170, 80);
+  meter1.update(meter1.val + 0.1);
 }
