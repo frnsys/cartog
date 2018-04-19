@@ -182,6 +182,7 @@ GAME.grid.setCellAt(water, 0, 0);
 The main functions you'll probably use are:
 
 - `showMessage(text, color, timeout, size)`: will show a message on the screen that disappears after `timeout` milliseconds.
+- `showModal(title, text, buttons)`: will show a modal/dialog window. The `buttons` parameter is optional; if nothing is specified the modal will just show an "OK" button.
 - `hasBonus(bonusName)`: lets you check if the player has a particular bonus or not.
 - `pause`: pauses the game and all timers created using `defineHarvester`, `every`, and `schedule`
 - `resume`: resumes the game and all timers created using `defineHarvester`, `every`, and `schedule`

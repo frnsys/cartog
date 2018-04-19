@@ -554,6 +554,10 @@ function showMessage(text, color, timeout, size) {
   }, timeout);
 }
 
+function showModal(title, text, buttons) {
+  let modal = new Modal(title, text, buttons);
+}
+
 function renderMessages(x, y) {
   GAME.messages.forEach((g, i) => {
     let y_ = y + ((messagePadding + g.height/2) * i);
