@@ -32,6 +32,7 @@ const GRID_CELL_SIZE = 80;
 const GRID_EMPTY = [247, 245, 165];
 const GRID_TYPE = 'hex';
 const GRID_DEFAULT_CELL = WaterCell;
+const TEXT_DEFAULT_COLOR = [50,50,50];
 
 // REQUIRED: define how our resources will be represented
 const RESOURCES = {

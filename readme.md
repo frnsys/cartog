@@ -66,6 +66,12 @@ Then the two top-level functions you should define are:
 - `init()`: this is equivalent to p5js' `setup()`. Include one-time setup code here.
 - `main()`: this is equivalent to p5js' `draw()`. This is called every frame.
 
+To change the default text color, set `TEXT_DEFAULT_COLOR` to an array of RGB values, e.g.:
+
+```
+const TEXT_DEFAULT_COLOR = [255,0,0];
+```
+
 # Classes
 
 The main classes:

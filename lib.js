@@ -570,7 +570,7 @@ const messagePadding = 6;
 
 function showMessage(text, color, timeout, size) {
   // no support for text wrapping
-  color = color || [0,0,0];
+  color = color || (typeof TEXT_DEFAULT_COLOR === 'undefined' ? [0,0,0] : TEXT_DEFAULT_COLOR);
   timeout = timeout || 5000;
   size = size || 16;
   let width = textWidth(text);
@@ -602,10 +602,12 @@ function renderMessages(x, y) {
 function renderResources(top, right, size) {
   size = size || 16;
   let height = size;
+  let color = typeof TEXT_DEFAULT_COLOR === 'undefined' ? [0,0,0] : TEXT_DEFAULT_COLOR;
   Object.keys(STATE.resources).forEach((k, i) => {
     let name = RESOURCES[k] || k;
     let body = `${name} ${numberWithCommas(STATE.resources[k])}`;
     let width = textWidth(body);
+    fill(...color);
     textSize(size);
     text(body, window.innerWidth - width - right, top + height/2 + (height * i));
   });
