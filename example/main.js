@@ -307,6 +307,8 @@ function init() {
   defineHarvester('money', function() {
     return STATE.resources.money * STATE.investment;
   }, 2000);
+
+  var meter = new Meter('Test Meter', 10);
 }
 
 // The game's main loop.

@@ -1,6 +1,7 @@
 'use strict';
 
 const GAME = {
+  meters: [],
   messages: [],
   harvesters: [],
   images: {},
@@ -683,6 +684,44 @@ class BuyButton extends Button {
   }
 }
 
+class Meter {
+  constructor(name, init, fillColor, bgColor) {
+    this.name = name;
+    this.textSize = 12;
+    this.spacing = 2;
+    this.barHeight = 16;
+    this.width = 120
+    this.height = this.barHeight + this.textSize + this.spacing;
+    this.g = createGraphics(this.width, this.height);
+    this.fillColor = fillColor || [255,0,0];
+    this.bgColor = bgColor || [50,50,50];
+    this.update(init);
+    GAME.meters.push(this);
+  }
+
+  // val should be in [0, 100];
+  update(val) {
+    if (val !== this.val) {
+      this.val = val;
+      this.g.noStroke();
+      this.g.fill(...this.bgColor);
+      this.g.rect(0, 0, this.width, this.barHeight);
+      this.g.fill(...this.fillColor);
+      this.g.rect(0, 0, this.width*(this.val/100), this.barHeight);
+      this.g.textSize(this.textSize);
+      this.g.textAlign(LEFT, TOP);
+      this.g.fill(...this.bgColor);
+      this.g.text(this.name, 0, this.barHeight + this.spacing);
+    }
+  }
+}
+
+function renderMeters(top, right) {
+  GAME.meters.forEach((m, i) => {
+    renderGraphic(m.g, top, right);
+  });
+}
+
 class Modal {
   constructor(title, text, buttons) {
     this.title = title;
@@ -855,6 +894,7 @@ function draw() {
   GAME.grid.render();
   renderMessages(10, 10);
   renderResources(10, 10);
+  renderMeters(10, 10);
   if (GAME.tooltip) {
     renderGraphic(GAME.tooltip, mouseX, mouseY);
   }
