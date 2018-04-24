@@ -72,6 +72,14 @@ To change the default text color, set `TEXT_DEFAULT_COLOR` to an array of RGB va
 const TEXT_DEFAULT_COLOR = [255,0,0];
 ```
 
+To use a background image, set `BACKGROUND_IMAGE` to an image url, e.g.:
+
+```
+const BACKGROUND_IMAGE = 'https://i.imgur.com/ythxt2c.jpg';
+```
+
+Note that this won't do anything to preserve the aspect ratio!
+
 # Classes
 
 The main classes:
