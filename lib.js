@@ -9,6 +9,7 @@ const GAME = {
   bonuses: [],
   timers: [],
   tooltip: null,
+  hoveredCell: null,
   grid: null,
   paused: false
 };
@@ -381,13 +382,17 @@ class Grid {
   enterCell(x, y) {
     let cell = this.cellAtPx(x, y);
     if (cell) {
-      if (cell.item && cell.item.info) {
-        GAME.tooltip = renderTooltip(cell.item.info);
-        return true;
-      } else if (!cell.item && cell.info) {
-        GAME.tooltip = renderTooltip(cell.info);
-        return true;
+      if (cell != GAME.hoveredCell) {
+        GAME.hoveredCell = cell;
+        if (cell.item && cell.item.info) {
+          GAME.tooltip = renderTooltip(cell.item.info);
+          return true;
+        } else if (!cell.item && cell.info) {
+          GAME.tooltip = renderTooltip(cell.info);
+          return true;
+        }
       }
+      return true;
     }
     return false;
   }
@@ -975,6 +980,7 @@ function mouseMoved() {
   if (GAME.grid) {
     if (!GAME.grid.enterCell(mouseX, mouseY)) {
       GAME.tooltip = null;
+      GAME.hoveredCell = null;
     }
   }
 }
