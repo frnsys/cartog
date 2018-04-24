@@ -564,6 +564,10 @@ function place(item, x, y) {
   GAME.grid.place(item, x, y);
 }
 
+function setCellAt(cell, x, y) {
+  GAME.grid.setCellAt(cell, x, y);
+}
+
 // --- UI
 
 const messagePadding = 6;
