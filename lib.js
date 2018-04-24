@@ -473,27 +473,24 @@ class HexGrid extends Grid {
 
   neighborPositionsAt(x, y) {
     let positions = [];
-
     if (y % 2 == 0) {
       if (x > 0) {
         positions.push([x-1, y]);
         if (y > 0) positions.push([x-1,y-1]);
         if (y < this.nRows-1) positions.push([x-1,y+1]);
       }
+      if (x < this.nCols-1) positions.push([x+1, y]);
+      if (y > 0) positions.push([x,y-1]);
+      if (y < this.nRows-1) positions.push([x,y+1]);
+    } else {
+      if (x > 0) positions.push([x-1, y]);
       if (x < this.nCols-1) {
         positions.push([x+1, y]);
         if (y > 0) positions.push([x+1,y-1]);
         if (y < this.nRows-1) positions.push([x+1,y+1]);
       }
-    } else {
-      if (x > 0) positions.push([x-1, y]);
-      if (x < this.nCols-1) {
-        positions.push([x+1, y]);
-        if (y > 0) positions.push([x+1, y-1]);
-        if (y < this.nRows-1) positions.push([x+1, y+1]);
-      }
-      if (y > 0) positions.push([x, y-1]);
-      if (y < this.nRows-1) positions.push([x, y+1]);
+      if (y > 0) positions.push([x,y-1]);
+      if (y < this.nRows-1) positions.push([x,y+1]);
     }
     return positions;
   }
