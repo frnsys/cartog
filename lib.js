@@ -602,7 +602,7 @@ function renderMessages(x, y) {
 function renderResources(top, right, size) {
   size = size || 16;
   let height = size;
-  let padding = 2;
+  let padding = 5;
   let color = typeof TEXT_DEFAULT_COLOR === 'undefined' ? [0,0,0] : TEXT_DEFAULT_COLOR;
   Object.keys(STATE.resources).forEach((k, i) => {
     let name = RESOURCES[k] || k;
