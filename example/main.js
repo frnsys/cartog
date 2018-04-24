@@ -334,8 +334,6 @@ function init() {
 
 
 // The game's main loop.
-// We're just using it to set a background color
 function main() {
-  // background(58, 170, 80);
   meter1.update(meter1.val + 0.1);
 }

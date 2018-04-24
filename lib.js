@@ -1,5 +1,9 @@
 'use strict';
 
+// for performance, see
+// https://github.com/processing/p5.js/wiki/Optimizing-p5.js-Code-for-Performance
+p5.disableFriendlyErrors = true;
+
 const GAME = {
   meters: [],
   messages: [],
@@ -11,7 +15,8 @@ const GAME = {
   tooltip: null,
   hoveredCell: null,
   grid: null,
-  paused: false
+  paused: false,
+  backgroundColor: [54, 193, 79]
 };
 
 // setup UI elements
@@ -238,6 +243,7 @@ class Item {
 class Grid {
   constructor(rows, cols, cellSize, defaultCell) {
     defaultCell = defaultCell || Cell;
+    this.needsUpdate = true;
     this.offset = {x: 0, y: 0};
     this.cellSize = cellSize;
     this.cellWidth = cellSize;
@@ -260,7 +266,7 @@ class Grid {
       }
     }
 
-    this.g = createGraphics(this.width, this.height);
+    this.g = createGraphics(window.innerWidth, window.innerHeight);
   }
 
   // place an item at x, y
@@ -273,6 +279,7 @@ class Grid {
     item.x = x;
     item.y = y;
     item.grid = this;
+    cell.needsUpdate = true;
   }
 
   cellAt(x, y) {
@@ -283,6 +290,7 @@ class Grid {
     cell.x = x;
     cell.y = y;
     this.grid[x][y] = cell;
+    cell.needsUpdate = true;
   }
 
   neighborPositionsAt(x, y) {
@@ -343,17 +351,28 @@ class Grid {
   }
 
   render() {
-    this.g.background(0,0,0,0);
+    this.x = window.innerWidth/2 - this.width/2 + this.offset.x;
+    this.y = window.innerHeight/2 - this.height/2 + this.offset.y;
+
+    if (this.needsUpdate) {
+      if (GAME.backgroundImage) {
+        this.g.background(GAME.backgroundImage);
+      } else {
+        this.g.background(...GAME.backgroundColor);
+      }
+    }
     this.g.strokeWeight(0.2);
     this.grid.forEach((row, x) => {
       row.forEach((cell, y) => {
-        this.renderCell(cell, x, y);
+        if (cell.needsUpdate || this.needsUpdate) {
+          this.renderCell(cell, x, y);
+          cell.needsUpdate = false;
+        }
       });
     });
+    this.needsUpdate = false;
 
-    this.x = window.innerWidth/2 - this.width/2 + this.offset.x;
-    this.y = window.innerHeight/2 - this.height/2 + this.offset.y;
-    renderGraphic(this.g, this.x, this.y);
+    renderGraphic(this.g, 0, 0);
   }
 
   inside(x, y) {
@@ -419,11 +438,17 @@ class Grid {
     } else {
       cell.onClick();
     }
+
+    // assume that if a cell is clicked,
+    // it needs to be re-rendered
+    cell.needsUpdate = true;
     return true;
   }
 
   remove(x, y) {
-    this.grid[x][y].item = null;
+    let cell = this.cellAt(x, y);
+    cell.item = null;
+    cell.needsUpdate = true;
   }
 }
 
@@ -449,13 +474,13 @@ class HexGrid extends Grid {
     this.cellWidth = Math.sqrt(3)/2 * this.cellHeight;
     this.mask = createGraphics(this.cellWidth, this.cellHeight);
     this.mask = makeHexagon(this.mask, this.cellWidth/2, this.cellHeight/2, this.size);
-    this.width = cols * this.cellWidth;
+    this.width = cols * this.cellWidth + this.cellWidth/2;
     this.height = rows * this.cellHeight;
   }
 
   renderCell(cell, x, y) {
-    let x_ = x*this.cellWidth + this.cellWidth/2;
-    let y_ = y*(this.cellHeight*3/4) + this.cellHeight/2;
+    let x_ = x*this.cellWidth + this.cellWidth/2 + this.x;
+    let y_ = y*(this.cellHeight*3/4) + this.cellHeight/2 + this.y;
     if (y % 2 == 1) {
       x_ += this.cellWidth/2;
     }
@@ -533,6 +558,7 @@ class HexGrid extends Grid {
 class Cell {
   constructor() {
     this.item = null;
+    this.needsUpdate = true;
     this.init();
   }
 
@@ -590,7 +616,8 @@ function showMessage(text, color, timeout, size) {
   GAME.messages.push(g);
   schedule(() => {
     let idx = GAME.messages.indexOf(g);
-    GAME.messages.splice(idx, 1);
+    let msg = GAME.messages.splice(idx, 1)[0];
+    msg.remove();
   }, timeout);
 }
 
@@ -928,6 +955,12 @@ function setup() {
 // resize canvas when the browser window resizes
 function windowResized() {
   resizeCanvas(window.innerWidth, window.innerHeight);
+
+  // p5js doesn't make it easy to resize a graphics,
+  // easier to just recreate
+  GAME.grid.remove();
+  GAME.grid.g = createGraphics(window.innerWidth, window.innerHeight);
+  GAME.grid.needsUpdate = true;
 }
 
 function preload() {
@@ -937,16 +970,15 @@ function preload() {
   });
   if (typeof BACKGROUND_IMAGE !== 'undefined') {
     GAME.backgroundImage = loadImage(BACKGROUND_IMAGE);
+  } else if (typeof BACKGROUND_COLOR !== 'undefined') {
+    GAME.backgroundColor = BACKGROUND_COLOR;
   }
 }
 
 function draw() {
-  if (GAME.backgroundImage) {
-    background(GAME.backgroundImage);
-  }
-
   textAlign(LEFT, TOP);
   main();
+
   if (!GAME.paused) {
     GAME.grid.update();
   }
@@ -968,6 +1000,12 @@ function draw() {
     image(img, mouseX, mouseY, GAME.grid.cellWidth, GAME.grid.cellHeight);
     text(stringifyCost(GAME.selected.cost, '\n'), mouseX, mouseY + GAME.grid.cellHeight + 6);
   }
+
+  // DEBUGGING
+  // var fps = frameRate();
+  // fill(255);
+  // stroke(0);
+  // text('FPS: ' + fps.toFixed(2), 10, 10);
 }
 
 
@@ -976,6 +1014,9 @@ function draw() {
 function mouseMoved() {
   if (GAME.grid) {
     if (!GAME.grid.enterCell(mouseX, mouseY)) {
+      if (GAME.tooltip) {
+        GAME.tooltip.remove();
+      }
       GAME.tooltip = null;
       GAME.hoveredCell = null;
     }
@@ -1006,5 +1047,6 @@ function mouseDragged() {
   if (typeof GRID_DRAG === 'undefined' || GRID_DRAG) {
     GAME.grid.offset.x += mouseXDiff;
     GAME.grid.offset.y += mouseYDiff;
+    GAME.grid.needsUpdate = true;
   }
 }
