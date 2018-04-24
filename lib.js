@@ -928,9 +928,16 @@ function preload() {
     let path = IMAGES[k];
     GAME.images[k] = loadImage(path);
   });
+  if (typeof BACKGROUND_IMAGE !== 'undefined') {
+    GAME.backgroundImage = loadImage(BACKGROUND_IMAGE);
+  }
 }
 
 function draw() {
+  if (GAME.backgroundImage) {
+    background(GAME.backgroundImage);
+  }
+
   textAlign(LEFT, TOP);
   main();
   if (!GAME.paused) {

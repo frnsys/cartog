@@ -24,6 +24,7 @@ const IMAGES = {
   pig: 'https://kids.nationalgeographic.com/content/dam/kids/photos/animals/Mammals/H-P/pig-young-closeup.ngsversion.1412640764383.jpg',
   wolf: 'https://static01.nyt.com/images/2017/10/17/science/17SCI-WOLVES7/17SCI-WOLVES7-superJumbo.jpg'
 };
+const BACKGROUND_IMAGE = 'https://i.imgur.com/ythxt2c.jpg';
 
 // REQUIRED: configure the grid
 const GRID_ROWS = 10;
@@ -335,6 +336,6 @@ function init() {
 // The game's main loop.
 // We're just using it to set a background color
 function main() {
-  background(58, 170, 80);
+  // background(58, 170, 80);
   meter1.update(meter1.val + 0.1);
 }
