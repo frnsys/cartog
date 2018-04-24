@@ -958,7 +958,7 @@ function windowResized() {
 
   // p5js doesn't make it easy to resize a graphics,
   // easier to just recreate
-  GAME.grid.remove();
+  GAME.grid.g.remove();
   GAME.grid.g = createGraphics(window.innerWidth, window.innerHeight);
   GAME.grid.needsUpdate = true;
 }
