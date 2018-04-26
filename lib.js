@@ -339,14 +339,13 @@ class Grid {
     let x_ = (x*this.cellWidth) + this.x;
     let y_ = (y*this.cellHeight) + this.y;
     this.g.fill(...cell.color);
+    if (cell.image) {
+      cell.render(this.g, x_, y_, this.cellWidth, this.cellHeight);
+    } else {
+      this.g.rect(x_, y_, this.cellWidth, this.cellHeight);
+    }
     if (cell.item) {
       cell.item.render(this.g, x_, y_, this.cellWidth, this.cellHeight);
-    } else {
-      if (cell.image) {
-        cell.render(this.g, x_, y_, this.cellWidth, this.cellHeight);
-      } else {
-        this.g.rect(x_, y_, this.cellWidth, this.cellHeight);
-      }
     }
   }
 
@@ -485,14 +484,13 @@ class HexGrid extends Grid {
       x_ += this.cellWidth/2;
     }
     this.g.fill(...cell.color);
+    if (cell.image) {
+      cell.render(this.g, x_-this.cellWidth/2, y_-this.cellHeight/2, this.cellWidth, this.cellHeight);
+    } else {
+      makeHexagon(this.g, x_, y_, this.size);
+    }
     if (cell.item) {
       cell.item.render(this.g, x_-this.cellWidth/2, y_-this.cellHeight/2, this.cellWidth, this.cellHeight);
-    } else {
-      if (cell.image) {
-        cell.render(this.g, x_-this.cellWidth/2, y_-this.cellHeight/2, this.cellWidth, this.cellHeight);
-      } else {
-        makeHexagon(this.g, x_, y_, this.size);
-      }
     }
   }
 
