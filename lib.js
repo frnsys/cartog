@@ -1044,7 +1044,7 @@ function mouseDragged() {
   GAME.lastMouseX = mouseX;
   GAME.lastMouseY = mouseY;
 
-  if (typeof GRID_DRAG === 'undefined' || GRID_DRAG) {
+  if (GAME.grid && (typeof GRID_DRAG === 'undefined' || GRID_DRAG)) {
     GAME.grid.offset.x += mouseXDiff;
     GAME.grid.offset.y += mouseYDiff;
     GAME.grid.needsUpdate = true;
