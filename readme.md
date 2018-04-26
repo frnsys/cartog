@@ -22,7 +22,7 @@ In your script you need to include the following:
 
 `STATE`, an object that must at least have a `resources` key. For example:
 
-```
+```js
 const STATE = {
   resources: {
     cash: 1000,
@@ -33,7 +33,7 @@ const STATE = {
 
 `RESOURCES`, which map resource names to their in-game representation, e.g:
 
-```
+```js
 const RESOURCES = {
   cash: '💵',
   water: '🚰'
@@ -44,7 +44,7 @@ These are automatically rendered as part of the UI.
 
 `IMAGES`, which passes in relative file paths of images to use, associating a name with each. These are referenced in the `Item`'s `image` getter (see below). For example:
 
-```
+```js
 const IMAGES = {
   wheat: 'assets/wheat_0.jpg',
   super_wheat: 'assets/wheat_1.jpg',
@@ -54,7 +54,7 @@ const IMAGES = {
 
 Other values you need to define that configure the 2D grid:
 
-```
+```js
 const GRID_ROWS = 10;
 const GRID_COLS = 10;
 const GRID_CELL_SIZE = 40;
@@ -68,19 +68,19 @@ Then the two top-level functions you should define are:
 
 To change the default text color, set `TEXT_DEFAULT_COLOR` to an array of RGB values, e.g.:
 
-```
+```js
 const TEXT_DEFAULT_COLOR = [255,0,0];
 ```
 
 To set a background color, set `BACKGROUND_COLOR` to an array of RGB values, e.g.:
 
-```
+```js
 const BACKGROUND_COLOR = [255,0,0];
 ```
 
 Or, to use a background image, set `BACKGROUND_IMAGE` to an image url, e.g.:
 
-```
+```js
 const BACKGROUND_IMAGE = 'https://i.imgur.com/ythxt2c.jpg';
 ```
 
@@ -118,7 +118,7 @@ Use this for bonuses that the player can purchase. It's unlikely that you'll nee
 
 To create a bonus:
 
-```
+```js
 let bonus = new Bonus('super fertilizer', 'a good fertilizer that increases crop growth', {'cash': 100}, () => {
   STATE.cropGrowth = 2;
 });
@@ -136,13 +136,13 @@ The bonuses that a player has will be shown in the bottom-left corner of the scr
 
 If you want in-game events to occur, you'll use these two classes. Wherever you want to create an event, you can do so like so:
 
-```
+```js
 let ev = new Event('My event name', 'some description of the event');
 ```
 
 This will create a modal describing the event. By default this just provides an "OK" button for the player to acknowledge the event. If you want players to choose from specific actions, you can do so like so:
 
-```
+```js
 let ev = new Event('My event name', 'some description of the event', [
   new Action('Fight', {energy: 10}, () => {
     STATE.health -= 20;
@@ -161,13 +161,13 @@ Note that `Event`s pause the game.
 
 By default, the grid is a square-based grid. You can use a hex-based grid instead by specifying:
 
-```
+```js
 const GRID_TYPE = 'hex';
 ```
 
 By default, the grid is draggable. If you want to disable draggability, you can set:
 
-```
+```js
 const GRID_DRAG = false;
 ```
 
@@ -188,7 +188,7 @@ Then use the cell at a grid position, create an instance of it and use `grid.set
 
 For example:
 
-```
+```js
 class WaterCell extends Cell {
   constructor(depth) {
     super();
@@ -216,7 +216,7 @@ GAME.grid.setCellAt(water, 0, 0);
 
 You can also specify one of these classes as the default cell for the grid:
 
-```
+```js
 const GRID_DEFAULT_CELL = WaterCell;
 ```
 
@@ -240,7 +240,7 @@ The main UI elements are `Menu`, `Modal`, and `Button`. `Menu` and `Modal` are s
 
 The `Menu` class is well-suited for, well, menus, such as those players can buy items from. You are almost always going to be using buttons for buying `Item`s and `Bonus`es, so there is a `BuyButton` class that handles that specifically:
 
-```
+```js
 let menu = new Menu('Farm Mall', [
   new BuyButton('Buy Water Collector', WaterCollector),
   new BuyButton('Buy Wheat', Wheat)
@@ -259,7 +259,7 @@ Note that all `Modal`s and `Menu`s pause the game.
 
 You can create percentage meters with the `Meter` class:
 
-```
+```js
 let meter = new Meter('Meter Name', 10);
 ```
 
@@ -267,6 +267,6 @@ Where the second parameter is the initial value, which should be between 0 and 1
 
 To update the value of the meter:
 
-```
+```js
 meter.update(50);
 ```
