@@ -336,8 +336,8 @@ class Grid {
   }
 
   renderCell(cell, x, y) {
-    let x_ = x*this.cellWidth;
-    let y_ = y*this.cellHeight;
+    let x_ = (x*this.cellWidth) + this.x;
+    let y_ = (y*this.cellHeight) + this.y;
     this.g.fill(...cell.color);
     if (cell.item) {
       cell.item.render(this.g, x_, y_, this.cellWidth, this.cellHeight);
@@ -345,7 +345,7 @@ class Grid {
       if (cell.image) {
         cell.render(this.g, x_, y_, this.cellWidth, this.cellHeight);
       } else {
-        this.g.rect(x_, y_, x_+this.cellWidth, y_+this.cellHeight);
+        this.g.rect(x_, y_, this.cellWidth, this.cellHeight);
       }
     }
   }
