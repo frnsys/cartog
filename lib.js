@@ -4,6 +4,8 @@
 // https://github.com/processing/p5.js/wiki/Optimizing-p5.js-Code-for-Performance
 p5.disableFriendlyErrors = true;
 
+const SCALE_MIN = 0.5;
+const SCALE_MAX = 2;
 const GAME = {
   meters: [],
   messages: [],
@@ -16,7 +18,8 @@ const GAME = {
   hoveredCell: null,
   grid: null,
   paused: false,
-  backgroundColor: [54, 193, 79]
+  backgroundColor: [54, 193, 79],
+  scale: 1
 };
 
 // setup UI elements
@@ -1053,4 +1056,11 @@ function mouseDragged() {
     GAME.grid.offset.y += mouseYDiff;
     GAME.grid.needsUpdate = true;
   }
+}
+
+function mouseWheel(event) {
+  GAME.scale -= event.delta/20;
+  GAME.scale = Math.max(SCALE_MIN, GAME.scale);
+  GAME.scale = Math.min(SCALE_MAX, GAME.scale);
+  GAME.grid.setCellSize(GRID_CELL_SIZE*GAME.scale);
 }
