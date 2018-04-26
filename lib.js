@@ -1059,8 +1059,10 @@ function mouseDragged() {
 }
 
 function mouseWheel(event) {
-  GAME.scale -= event.delta/20;
-  GAME.scale = Math.max(SCALE_MIN, GAME.scale);
-  GAME.scale = Math.min(SCALE_MAX, GAME.scale);
-  GAME.grid.setCellSize(GRID_CELL_SIZE*GAME.scale);
+  if (GAME.grid && (typeof GRID_DRAG === 'undefined' || GRID_ZOOM)) {
+    GAME.scale -= event.delta/20;
+    GAME.scale = Math.max(SCALE_MIN, GAME.scale);
+    GAME.scale = Math.min(SCALE_MAX, GAME.scale);
+    GAME.grid.setCellSize(GRID_CELL_SIZE*GAME.scale);
+  }
 }

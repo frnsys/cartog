@@ -178,6 +178,13 @@ By default, the grid is draggable. If you want to disable draggability, you can 
 ```js
 const GRID_DRAG = false;
 ```
+
+By default, the grid is zoomable. If you want to disable zooming, you can set:
+
+```js
+const GRID_ZOOM = false;
+```
+
 As mentioned for the initial setup, the grid cell size is specified with:
 
 ```js
