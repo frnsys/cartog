@@ -119,9 +119,13 @@ Use this for bonuses that the player can purchase. It's unlikely that you'll nee
 To create a bonus:
 
 ```js
-let bonus = new Bonus('super fertilizer', 'a good fertilizer that increases crop growth', {'cash': 100}, () => {
-  STATE.cropGrowth = 2;
-});
+let bonus = new Bonus(
+  'super fertilizer',
+  'a good fertilizer that increases crop growth',
+  {'cash': 100},
+  () => {
+      STATE.cropGrowth = 2;
+  });
 ```
 
 So you pass in a name for the bonus, a description, then its cost, and an optional effect that's called once the bonus is purchased.
@@ -159,11 +163,15 @@ Note that `Event`s pause the game.
 
 # Grid
 
+![](shots/grid.png)
+
 By default, the grid is a square-based grid. You can use a hex-based grid instead by specifying:
 
 ```js
 const GRID_TYPE = 'hex';
 ```
+
+![](shots/hex.png)
 
 By default, the grid is draggable. If you want to disable draggability, you can set:
 
@@ -238,6 +246,8 @@ The main functions you'll probably use are:
 
 The main UI elements are `Menu`, `Modal`, and `Button`. `Menu` and `Modal` are similar, and more or less function as ways of grouping `Button`s together.
 
+![](shots/menu.png)
+
 The `Menu` class is well-suited for, well, menus, such as those players can buy items from. You are almost always going to be using buttons for buying `Item`s and `Bonus`es, so there is a `BuyButton` class that handles that specifically:
 
 ```js
@@ -247,15 +257,25 @@ let menu = new Menu('Farm Mall', [
 ]);
 ```
 
-So buttons basically take a title and then a function that's executed if that button is clicked.
+Buttons basically take a title and then a function that's executed if that button is clicked:
+
+```js
+new Button('Click me', () => {
+  alert('I was clicked');
+});
+```
 
 One thing of note with the `Menu` class it that when you create a new `Menu`, it will automatically have a button added to the page that will open that menu when clicked.
+
+![](shots/modal.png)
 
 The `Modal` class is very similar to the `Menu` class, but as the name suggests more appropriate for modals/popups.
 
 Note that all `Modal`s and `Menu`s pause the game.
 
 # Meters
+
+![](shots/meters.png)
 
 You can create percentage meters with the `Meter` class:
 
@@ -266,6 +286,29 @@ let meter = new Meter('Meter Name', 10);
 Where the second parameter is the initial value, which should be between 0 and 100.
 
 To update the value of the meter:
+
+```js
+meter.update(50);
+```
+
+To get the current value of the meter:
+
+```js
+meter.val;
+```
+
+You'll likely want to create these in your `init` function:
+```js
+let meter;
+
+function init() {
+    // ...
+    meter = new Meter('Meter Name', 10);
+    // ...
+}
+```
+
+And then somewhere else, you can update the meter:
 
 ```js
 meter.update(50);
