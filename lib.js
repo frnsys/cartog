@@ -245,13 +245,9 @@ class Grid {
     defaultCell = defaultCell || Cell;
     this.needsUpdate = true;
     this.offset = {x: 0, y: 0};
-    this.cellSize = cellSize;
-    this.cellWidth = cellSize;
-    this.cellHeight = cellSize;
     this.nCols = cols;
     this.nRows = rows;
-    this.width = cols * this.cellWidth;
-    this.height = rows * this.cellHeight;
+    this.setCellSize(cellSize);
 
     // initialize null grid of
     // dimensions width x height
@@ -267,6 +263,15 @@ class Grid {
     }
 
     this.g = createGraphics(window.innerWidth, window.innerHeight);
+  }
+
+  setCellSize(cellSize) {
+    this.cellSize = cellSize;
+    this.cellWidth = cellSize;
+    this.cellHeight = cellSize;
+    this.width = this.nCols * this.cellWidth;
+    this.height = this.nRows * this.cellHeight;
+    this.needsUpdate = true;
   }
 
   // place an item at x, y
@@ -466,15 +471,16 @@ function makeHexagon(g, x, y, size) {
 }
 
 class HexGrid extends Grid {
-  constructor(rows, cols, cellSize, defaultCell) {
-    super(rows, cols, cellSize, defaultCell);
+  setCellSize(cellSize) {
+    this.cellSize = cellSize;
     this.size = this.cellSize/2;
     this.cellHeight = this.size * 2;
     this.cellWidth = Math.sqrt(3)/2 * this.cellHeight;
     this.mask = createGraphics(this.cellWidth, this.cellHeight);
     this.mask = makeHexagon(this.mask, this.cellWidth/2, this.cellHeight/2, this.size);
-    this.width = cols * this.cellWidth + this.cellWidth/2;
-    this.height = rows * this.cellHeight;
+    this.width = this.nCols * this.cellWidth + this.cellWidth/2;
+    this.height = this.nRows * this.cellHeight;
+    this.needsUpdate = true;
   }
 
   renderCell(cell, x, y) {

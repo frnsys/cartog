@@ -178,6 +178,19 @@ By default, the grid is draggable. If you want to disable draggability, you can 
 ```js
 const GRID_DRAG = false;
 ```
+As mentioned for the initial setup, the grid cell size is specified with:
+
+```js
+const GRID_CELL_SIZE = 40;
+```
+
+However, you can also change this value at runtime like so:
+
+```js
+GAME.grid.setCellSize(80);
+```
+
+You can use this to implement a zoom feature.
 
 ## Grid cells
 
