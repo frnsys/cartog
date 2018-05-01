@@ -325,6 +325,12 @@ let meter = new Meter('Meter Name', 10);
 
 Where the second parameter is the initial value, which should be between 0 and 100.
 
+Optionally you can specify the fill color and background color:
+
+```js
+let meter = new Meter('Meter Name', 10, [255,0,0], [0,0,0]);
+```
+
 To update the value of the meter:
 
 ```js
