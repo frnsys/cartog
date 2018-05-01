@@ -5,8 +5,8 @@
 p5.disableFriendlyErrors = true;
 
 let GRID_ZOOM_SCALE = 1/20;
-let SCALE_MIN = 0.5;
-let SCALE_MAX = 2;
+let GRID_ZOOM_SCALE_MIN = 0.5;
+let GRID_ZOOM_SCALE_MAX = 2;
 const GAME = {
   meters: [],
   messages: [],
@@ -1062,8 +1062,8 @@ function mouseDragged() {
 function mouseWheel(event) {
   if (GAME.grid && (typeof GRID_DRAG === 'undefined' || GRID_ZOOM)) {
     GAME.scale -= event.delta * GRID_ZOOM_SCALE;
-    GAME.scale = Math.max(SCALE_MIN, GAME.scale);
-    GAME.scale = Math.min(SCALE_MAX, GAME.scale);
+    GAME.scale = Math.max(GRID_ZOOM_SCALE_MIN, GAME.scale);
+    GAME.scale = Math.min(GRID_ZOOM_SCALE_MAX, GAME.scale);
     GAME.grid.setCellSize(GRID_CELL_SIZE*GAME.scale);
   }
 }
