@@ -487,7 +487,7 @@ class HexGrid extends Grid {
     this.mask = createGraphics(this.cellWidth, this.cellHeight);
     this.mask = makeHexagon(this.mask, this.cellWidth/2, this.cellHeight/2, this.size);
     this.width = this.nCols * this.cellWidth + this.cellWidth/2;
-    this.height = this.nRows * this.cellHeight;
+    this.height = this.nRows * (this.cellHeight * 3/4) + (this.cellHeight * 1/4);
     this.needsUpdate = true;
   }
 
