@@ -86,6 +86,15 @@ const BACKGROUND_IMAGE = 'https://i.imgur.com/ythxt2c.jpg';
 
 Note that this won't do anything to preserve the aspect ratio!
 
+Other configuration options:
+
+```js
+RESOURCES_TEXT_SIZE = 16;
+METERS_TEXT_SIZE = 12;
+METERS_BAR_HEIGHT = 16;
+METERS_BAR_WIDTH = 120;
+```
+
 # Classes
 
 The main classes:

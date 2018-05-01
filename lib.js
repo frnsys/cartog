@@ -4,6 +4,10 @@
 // https://github.com/processing/p5.js/wiki/Optimizing-p5.js-Code-for-Performance
 p5.disableFriendlyErrors = true;
 
+let RESOURCES_TEXT_SIZE = 16;
+let METERS_TEXT_SIZE = 12;
+let METERS_BAR_HEIGHT = 16;
+let METERS_BAR_WIDTH = 120;
 let GRID_ZOOM_SCALE = 1/20;
 let GRID_ZOOM_SCALE_MIN = 0.5;
 let GRID_ZOOM_SCALE_MAX = 2;
@@ -641,7 +645,7 @@ function renderMessages(x, y) {
 }
 
 function renderResources(top, right, size) {
-  size = size || 16;
+  size = size || RESOURCES_TEXT_SIZE;
   let height = size;
   let padding = 5;
   let color = typeof TEXT_DEFAULT_COLOR === 'undefined' ? [0,0,0] : TEXT_DEFAULT_COLOR;
@@ -760,10 +764,10 @@ class BuyButton extends Button {
 class Meter {
   constructor(name, init, fillColor, bgColor) {
     this.name = name;
-    this.textSize = 12;
+    this.textSize = METERS_TEXT_SIZE;
     this.spacing = 2;
-    this.barHeight = 16;
-    this.barWidth = 120;
+    this.barHeight = METERS_BAR_HEIGHT;
+    this.barWidth = METERS_BAR_WIDTH;
     this.width = Math.max(this.barWidth, textWidth(name));
     this.height = this.barHeight + this.textSize + this.spacing;
     this.g = createGraphics(this.width, this.height);
