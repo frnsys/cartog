@@ -185,6 +185,12 @@ By default, the grid is zoomable. If you want to disable zooming, you can set:
 const GRID_ZOOM = false;
 ```
 
+You can also adjust the strength of the zoom:
+
+```js
+GRID_ZOOM_SCALE = 1/20;
+```
+
 As mentioned for the initial setup, the grid cell size is specified with:
 
 ```js

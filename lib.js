@@ -4,6 +4,7 @@
 // https://github.com/processing/p5.js/wiki/Optimizing-p5.js-Code-for-Performance
 p5.disableFriendlyErrors = true;
 
+let GRID_ZOOM_SCALE = 1/20;
 const SCALE_MIN = 0.5;
 const SCALE_MAX = 2;
 const GAME = {
@@ -1060,7 +1061,7 @@ function mouseDragged() {
 
 function mouseWheel(event) {
   if (GAME.grid && (typeof GRID_DRAG === 'undefined' || GRID_ZOOM)) {
-    GAME.scale -= event.delta/20;
+    GAME.scale -= event.delta * GRID_ZOOM_SCALE;
     GAME.scale = Math.max(SCALE_MIN, GAME.scale);
     GAME.scale = Math.min(SCALE_MAX, GAME.scale);
     GAME.grid.setCellSize(GRID_CELL_SIZE*GAME.scale);
