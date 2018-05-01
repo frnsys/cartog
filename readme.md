@@ -203,8 +203,6 @@ However, you can also change this value at runtime like so:
 GAME.grid.setCellSize(80);
 ```
 
-You can use this to implement a zoom feature.
-
 ## Grid cells
 
 You may want to have different kinds of cells in the grid, e.g. some cells are water and can't have items placed in them, or certain items can only be placed on certain cells.
