@@ -5,8 +5,8 @@
 p5.disableFriendlyErrors = true;
 
 let GRID_ZOOM_SCALE = 1/20;
-const SCALE_MIN = 0.5;
-const SCALE_MAX = 2;
+let SCALE_MIN = 0.5;
+let SCALE_MAX = 2;
 const GAME = {
   meters: [],
   messages: [],
