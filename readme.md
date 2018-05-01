@@ -191,6 +191,13 @@ You can also adjust the strength of the zoom:
 GRID_ZOOM_SCALE = 1/20;
 ```
 
+And you can also adjust the min and max zoom scales:
+
+```js
+SCALE_MIN = 0.5;
+SCALE_MAX = 2;
+```
+
 As mentioned for the initial setup, the grid cell size is specified with:
 
 ```js
