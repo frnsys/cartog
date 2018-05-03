@@ -272,6 +272,17 @@ You can also specify one of these classes as the default cell for the grid:
 const GRID_DEFAULT_CELL = WaterCell;
 ```
 
+## Grid utility functions
+
+- use `grid.cells` to get an array of all cells in the grid
+- use `grid.emptyCells` to get an array of all empty cells (cells without an item) in the grid
+
+You can use these, for instance, to get a random unoccupied cell to place an item at:
+
+```js
+let cell = randomChoice(GAME.grid.emptyCells);
+```
+
 # Helper functions
 
 The main functions you'll probably use are:

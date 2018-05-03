@@ -313,6 +313,14 @@ class Grid {
     cell.needsUpdate = true;
   }
 
+  get cells() {
+    return this.grid.reduce((acc, val) => acc.concat(val), []);
+  }
+
+  get emptyCells() {
+    return this.grid.reduce((acc, val) => acc.concat(val), []).filter((c) => !c.item);
+  }
+
   neighborPositionsAt(x, y) {
     let positions = [];
     if (x > 0) {
