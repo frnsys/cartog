@@ -1,9 +1,5 @@
 'use strict';
 
-// for performance, see
-// https://github.com/processing/p5.js/wiki/Optimizing-p5.js-Code-for-Performance
-p5.disableFriendlyErrors = true;
-
 let RESOURCES_TEXT_SIZE = 16;
 let RESOURCES_POSITION = [10, 10];
 let METERS_TEXT_SIZE = 12;
@@ -66,6 +62,11 @@ function stringifyCost(cost, delimiter) {
     costs.push(body);
   });
   return costs.join(delimiter);
+}
+
+function randomChoice(arr) {
+  let idx = Math.floor(Math.random() * arr.length);
+  return arr[idx];
 }
 
 // --- TIME

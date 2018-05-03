@@ -362,3 +362,7 @@ And then somewhere else, you can update the meter:
 ```js
 meter.update(50);
 ```
+
+# Utility functions
+
+- `randomChoice(arr)`: returns a random choice from a given array
