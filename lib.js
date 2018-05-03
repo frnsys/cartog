@@ -164,15 +164,16 @@ function buy(item) {
 
 // handy func to pass to buttons
 // that just involve buying things
-function tryBuy(cls) {
+function tryBuy(cls, cb) {
   let fn = () => {
     let o = isConstructor(cls) ? new cls() : cls;
+    let bought = false;
 
     // Items are bought on placement
     if (o instanceof Item) {
       GAME.selected = o;
       GAME.selectedCls = cls;
-      return true;
+      bought = true;
 
     // everything else (Actions & Bonuses)
     // are bought on click
@@ -184,9 +185,12 @@ function tryBuy(cls) {
       if (o.effect) {
         o.effect();
       }
-      return true;
+      bought = true;
     }
-    return false;
+    if (bought && cb) {
+      cb();
+    }
+    return bought;
   };
 
   fn.item = isConstructor(cls) ? new cls() : cls;
@@ -749,17 +753,18 @@ class Button {
 }
 
 class BuyButton extends Button {
-  constructor(text, cls, showPredicate) {
+  constructor(text, cls, cb, showPredicate) {
     // bonuses can only be purchased once,
     // if the bonus is already owned,
     // don't show the buttons for it
+    cb = cb || (() => {});
     showPredicate = showPredicate || (() => {
       if (cls instanceof Bonus && hasBonus(cls.name)) {
         return false;
       }
       return true;
     })
-    super(text, tryBuy(cls), showPredicate);
+    super(text, tryBuy(cls, cb), showPredicate);
   }
 }
 
