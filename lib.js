@@ -5,6 +5,7 @@
 p5.disableFriendlyErrors = true;
 
 let RESOURCES_TEXT_SIZE = 16;
+let RESOURCES_POSITION = [10, 10];
 let METERS_TEXT_SIZE = 12;
 let METERS_BAR_HEIGHT = 16;
 let METERS_BAR_WIDTH = 120;
@@ -996,7 +997,7 @@ function draw() {
   }
   GAME.grid.render();
   renderMessages(10, 10);
-  renderResources(10, 10);
+  renderResources(RESOURCES_POSITION[0], RESOURCES_POSITION[1]);
   renderMeters();
   if (GAME.tooltip) {
     renderGraphic(GAME.tooltip, mouseX, mouseY);

@@ -93,6 +93,9 @@ RESOURCES_TEXT_SIZE = 16;
 METERS_TEXT_SIZE = 12;
 METERS_BAR_HEIGHT = 16;
 METERS_BAR_WIDTH = 120;
+
+// this is position from the top, right of the screen
+RESOURCES_POSITION = [10,10];
 ```
 
 # Classes
