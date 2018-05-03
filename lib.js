@@ -632,7 +632,13 @@ function showMessage(text, color, timeout, size) {
   color = color || (typeof TEXT_DEFAULT_COLOR === 'undefined' ? [0,0,0] : TEXT_DEFAULT_COLOR);
   timeout = timeout || 5000;
   size = size || MESSAGES_TEXT_SIZE;
-  let width = textWidth(text);
+
+  // may be a better way,
+  // but get the proper width for the text
+  let dummyG = createGraphics(0, 0);
+  dummyG.textSize(size);
+  let width = dummyG.textWidth(text);
+
   let g = createGraphics(width*2, size*2);
   g.fill(...color);
   // g.background(0,255,0); // DEBUG
