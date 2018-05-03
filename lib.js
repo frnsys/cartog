@@ -2,6 +2,7 @@
 
 let RESOURCES_TEXT_SIZE = 16;
 let RESOURCES_POSITION = [10, 10];
+let MESSAGES_TEXT_SIZE = 16;
 let METERS_TEXT_SIZE = 12;
 let METERS_BAR_HEIGHT = 16;
 let METERS_BAR_WIDTH = 120;
@@ -622,7 +623,7 @@ function showMessage(text, color, timeout, size) {
   // no support for text wrapping
   color = color || (typeof TEXT_DEFAULT_COLOR === 'undefined' ? [0,0,0] : TEXT_DEFAULT_COLOR);
   timeout = timeout || 5000;
-  size = size || 16;
+  size = size || MESSAGES_TEXT_SIZE;
   let width = textWidth(text);
   let g = createGraphics(width*2, size*2);
   g.fill(...color);
